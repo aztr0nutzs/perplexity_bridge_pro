@@ -47,6 +47,31 @@
     <!-- Chat Tab -->
     <div id="chat-tab" class="tab-content active">
         <div class="chat-container">
+            <!-- Dashboard Widgets Area -->
+            <div class="dashboard-widgets" id="dashboardWidgets">
+                <div class="widget quick-actions holographic">
+                    <h3>Quick Actions</h3>
+                    <div class="quick-action-buttons">
+                        <button class="icon-btn" title="New Conversation" onclick="clearConversation()">🆕</button>
+                        <button class="icon-btn" title="Load Template" onclick="loadTemplate()">📝</button>
+                        <button class="icon-btn" title="Voice Input" onclick="startVoiceInput()">🎤</button>
+                        <button class="icon-btn" title="Settings" onclick="switchTab('settings')">⚙️</button>
+                    </div>
+                </div>
+                <div class="widget conversation-stats holographic">
+                    <h3>Session Stats</h3>
+                    <div class="stat-item">Messages: <span id="sessionMessages">0</span></div>
+                    <div class="stat-item">Tokens: <span id="sessionTokens">0</span></div>
+                    <div class="stat-item">Time: <span id="sessionTime">0s</span></div>
+                </div>
+                <div class="widget favorites holographic">
+                    <h3>Favorites</h3>
+                    <div class="favorites-list" id="favoritesList">
+                        <div class="empty-state">No favorites yet</div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Conversation Area -->
             <div class="conversation-area">
                 <div id="conversation" class="conversation"></div>
@@ -63,6 +88,7 @@
                             <button id="clearBtn" class="icon-btn" title="Clear Conversation">🗑️</button>
                             <button id="copyBtn" class="icon-btn" title="Copy Last Response">📋</button>
                             <button id="exportBtn" class="icon-btn" title="Export Conversation">💾</button>
+                            <button id="favoriteBtn" class="icon-btn" title="Add to Favorites" onclick="addToFavorites()">⭐</button>
                             <button id="sendBtn" class="send-btn" onclick="send()">
                                 <span class="btn-text">Send</span>
                                 <span class="btn-icon">➤</span>

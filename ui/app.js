@@ -114,35 +114,93 @@ function setupEventListeners() {
             const tab = e.currentTarget.dataset.tab;
             switchTab(tab);
         });
+        
+        // Add tooltip for tab buttons
+        btn.addEventListener('mouseenter', (e) => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'context-tooltip';
+            tooltip.textContent = getTabTooltip(btn.dataset.tab);
+            tooltip.style.position = 'absolute';
+            tooltip.style.background = 'var(--bg-card)';
+            tooltip.style.border = '1px solid var(--accent)';
+            tooltip.style.padding = '0.5rem';
+            tooltip.style.borderRadius = '8px';
+            tooltip.style.color = 'var(--text-primary)';
+            tooltip.style.fontSize = '0.875rem';
+            tooltip.style.zIndex = '1000';
+            tooltip.style.boxShadow = 'var(--neon-glow)';
+            tooltip.style.maxWidth = '200px';
+            
+            const rect = btn.getBoundingClientRect();
+            tooltip.style.top = `${rect.top - 40}px`;
+            tooltip.style.left = `${rect.left}px`;
+            
+            document.body.appendChild(tooltip);
+            
+            btn._tooltip = tooltip;
+        });
+        
+        btn.addEventListener('mouseleave', (e) => {
+            if (btn._tooltip) {
+                btn._tooltip.remove();
+                btn._tooltip = null;
+            }
+        });
     });
     
-    // Sliders
+    // Sliders with value display
     document.getElementById('temperature').addEventListener('input', (e) => {
         cfg.temperature = parseFloat(e.target.value);
         document.getElementById('tempValue').textContent = cfg.temperature.toFixed(1);
+        showSliderValue(e.target, cfg.temperature.toFixed(1));
     });
     
     document.getElementById('maxTokens').addEventListener('input', (e) => {
         cfg.maxTokens = parseInt(e.target.value);
         document.getElementById('tokensValue').textContent = cfg.maxTokens;
+        showSliderValue(e.target, cfg.maxTokens);
     });
     
     document.getElementById('frequencyPenalty').addEventListener('input', (e) => {
         cfg.frequencyPenalty = parseFloat(e.target.value);
         document.getElementById('freqValue').textContent = cfg.frequencyPenalty.toFixed(1);
+        showSliderValue(e.target, cfg.frequencyPenalty.toFixed(1));
     });
     
-    // Advanced options toggle
+    // Advanced options toggle with animation
     document.getElementById('advancedToggle').addEventListener('click', () => {
         const panel = document.getElementById('advancedOptions');
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        const isHidden = panel.style.display === 'none';
+        
+        if (isHidden) {
+            panel.style.display = 'block';
+            panel.style.animation = 'slideDown 0.3s ease-out';
+        } else {
+            panel.style.animation = 'slideUp 0.3s ease-out';
+            setTimeout(() => {
+                panel.style.display = 'none';
+            }, 300);
+        }
     });
     
-    // Buttons
-    document.getElementById('clearBtn').addEventListener('click', clearConversation);
+    // Buttons with enhanced feedback
+    document.getElementById('clearBtn').addEventListener('click', () => {
+        if (currentConversation.length > 0) {
+            clearConversation();
+        } else {
+            showMessage('Conversation is already empty', 'info');
+        }
+    });
+    
     document.getElementById('copyBtn').addEventListener('click', copyLastResponse);
     document.getElementById('exportBtn').addEventListener('click', exportConversation);
-    document.getElementById('clearHistoryBtn').addEventListener('click', clearAllHistory);
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+        if (conversationHistory.length > 0) {
+            clearAllHistory();
+        } else {
+            showMessage('History is already empty', 'info');
+        }
+    });
     document.getElementById('exportAllBtn').addEventListener('click', exportAllHistory);
     document.getElementById('refreshModelsBtn').addEventListener('click', loadModels);
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
@@ -152,6 +210,13 @@ function setupEventListeners() {
     document.getElementById('autoSave').addEventListener('change', save);
     document.getElementById('showTimestamps').addEventListener('change', save);
     document.getElementById('soundEnabled').addEventListener('change', save);
+    
+    // Add input validation and guidance
+    document.getElementById('url').addEventListener('blur', validateUrl);
+    document.getElementById('key').addEventListener('blur', validateKey);
+    
+    // Add predictive search for models
+    setupModelSearch();
 }
 
 // Setup keyboard shortcuts
@@ -238,6 +303,11 @@ function addMessageToConversation(role, content, timestamp = null) {
     if (cfg.autoSave) {
         saveCurrentConversation();
     }
+    
+    // Add contextual guidance for user messages
+    if (role === 'user') {
+        provideContextualGuidance(content);
+    }
 }
 
 // Render conversation
@@ -265,6 +335,18 @@ function renderConversation() {
                 ? renderMarkdown(msg.content) 
                 : escapeHtml(msg.content)}</div>
         `;
+        
+        // Add contextual actions for user messages
+        if (msg.role === 'user') {
+            const actions = document.createElement('div');
+            actions.className = 'message-actions';
+            actions.innerHTML = `
+                <button class="icon-btn action-btn" title="Edit message" onclick="editMessage(${index})">✏️</button>
+                <button class="icon-btn action-btn" title="Delete message" onclick="deleteMessage(${index})">🗑️</button>
+                <button class="icon-btn action-btn" title="Get suggestions" onclick="getSuggestions('${escapeHtml(msg.content)}')">💡</button>
+            `;
+            msgEl.appendChild(actions);
+        }
         
         container.appendChild(msgEl);
     });
@@ -514,6 +596,22 @@ function sendWebSocket() {
 
 // Main send function (global for onclick handlers)
 window.send = async function() {
+    const prompt = document.getElementById('prompt').value.trim();
+    
+    if (!prompt) {
+        showMessage('Please enter a prompt', 'error');
+        return;
+    }
+    
+    // Show smart suggestions before sending
+    if (cfg.showTimestamps) {
+        const suggestions = getSmartSuggestions(prompt);
+        if (suggestions.length > 0) {
+            showSuggestionsModal(suggestions);
+            return;
+        }
+    }
+    
     if (cfg.useStreaming) {
         sendWebSocket();
     } else {
@@ -521,8 +619,193 @@ window.send = async function() {
     }
 };
 
+// Get smart suggestions based on user input
+function getSmartSuggestions(prompt) {
+    const suggestions = [];
+    
+    // Analyze prompt for common patterns
+    if (prompt.toLowerCase().includes('how to') || prompt.toLowerCase().includes('what is')) {
+        suggestions.push('Would you like me to provide a detailed explanation?');
+    }
+    
+    if (prompt.toLowerCase().includes('code') || prompt.toLowerCase().includes('program')) {
+        suggestions.push('Should I provide code examples in my response?');
+    }
+    
+    if (prompt.length > 200) {
+        suggestions.push('Your prompt is quite long. Would you like me to summarize key points?');
+    }
+    
+    return suggestions;
+}
+
+// Show suggestions modal
+function showSuggestionsModal(suggestions) {
+    const modal = document.createElement('div');
+    modal.className = 'suggestions-modal';
+    modal.innerHTML = `
+        <div class="modal-content holographic">
+            <h3>💡 Smart Suggestions</h3>
+            <ul>
+                ${suggestions.map(s => `<li>${s}</li>`).join('')}
+            </ul>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove()">Cancel</button>
+                <button class="btn-primary" onclick="proceedWithSend()">Proceed Anyway</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Proceed with sending after suggestions
+window.proceedWithSend = function() {
+    const modals = document.querySelectorAll('.suggestions-modal');
+    modals.forEach(m => m.remove());
+    
+    if (cfg.useStreaming) {
+        sendWebSocket();
+    } else {
+        sendRest();
+    }
+};
+
 // Save function (global for onclick handlers)
 window.save = save;
+
+// Validate URL input
+function validateUrl() {
+    const urlInput = document.getElementById('url');
+    const url = urlInput.value.trim();
+    
+    if (!url) {
+        showMessage('Please enter a URL', 'error');
+        return false;
+    }
+    
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        showMessage('URL should start with http:// or https://', 'warning');
+        return false;
+    }
+    
+    // Show success feedback
+    showMessage('URL looks good!', 'success');
+    return true;
+}
+
+// Validate API key
+function validateKey() {
+    const keyInput = document.getElementById('key');
+    const key = keyInput.value.trim();
+    
+    if (!key) {
+        showMessage('Please enter an API key', 'error');
+        return false;
+    }
+    
+    if (key.length < 8) {
+        showMessage('API key should be at least 8 characters', 'warning');
+        return false;
+    }
+    
+    // Show success feedback
+    showMessage('API key looks valid!', 'success');
+    return true;
+}
+
+// Show slider value as tooltip
+function showSliderValue(slider, value) {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'slider-tooltip';
+    tooltip.textContent = value;
+    tooltip.style.position = 'absolute';
+    tooltip.style.background = 'var(--accent)';
+    tooltip.style.color = 'white';
+    tooltip.style.padding = '0.25rem 0.5rem';
+    tooltip.style.borderRadius = '4px';
+    tooltip.style.fontSize = '0.875rem';
+    tooltip.style.zIndex = '1000';
+    tooltip.style.boxShadow = 'var(--neon-glow)';
+    
+    const rect = slider.getBoundingClientRect();
+    const thumbPosition = ((slider.value - slider.min) / (slider.max - slider.min)) * rect.width;
+    
+    tooltip.style.top = `${rect.top - 30}px`;
+    tooltip.style.left = `${rect.left + thumbPosition - 20}px`;
+    
+    document.body.appendChild(tooltip);
+    
+    // Remove tooltip after delay
+    setTimeout(() => {
+        tooltip.remove();
+    }, 1000);
+}
+
+// Get tab tooltip
+function getTabTooltip(tabName) {
+    const tips = {
+        'chat': 'Start or continue your conversation with the AI',
+        'history': 'View and manage your previous conversations',
+        'settings': 'Configure connection and display preferences',
+        'models': 'Browse and select available AI models',
+        'stats': 'View usage statistics and activity logs'
+    };
+    
+    return tips[tabName] || 'Navigate to this section';
+}
+
+// Provide contextual guidance
+function provideContextualGuidance(message) {
+    // Simple keyword-based guidance
+    const lowerMsg = message.toLowerCase();
+    
+    if (lowerMsg.includes('help') || lowerMsg.includes('how do i')) {
+        setTimeout(() => {
+            showMessage('💡 Tip: Try being specific in your questions for better answers!', 'info');
+        }, 1000);
+    }
+    
+    if (lowerMsg.includes('code') || lowerMsg.includes('program')) {
+        setTimeout(() => {
+            showMessage('💡 Tip: Specify the programming language for code examples!', 'info');
+        }, 1000);
+    }
+}
+
+// Edit message
+window.editMessage = function(index) {
+    const message = currentConversation[index];
+    if (message.role === 'user') {
+        const newContent = prompt('Edit your message:', message.content);
+        if (newContent !== null && newContent.trim() !== '') {
+            message.content = newContent.trim();
+            renderConversation();
+            showMessage('Message updated', 'success');
+        }
+    }
+}
+
+// Delete message
+window.deleteMessage = function(index) {
+    if (confirm('Delete this message?')) {
+        currentConversation.splice(index, 1);
+        renderConversation();
+        showMessage('Message deleted', 'success');
+    }
+}
+
+// Get suggestions for message
+window.getSuggestions = function(messageContent) {
+    const suggestions = [
+        'Try asking for more details',
+        'Request code examples if applicable',
+        'Ask for step-by-step instructions',
+        'Consider breaking this into multiple questions'
+    ];
+    
+    showMessage(`Suggestions: ${suggestions.join(', ')}`, 'info');
+}
 
 // Clear conversation
 function clearConversation() {
@@ -575,7 +858,7 @@ async function loadModels() {
         if (response.ok) {
             const data = await response.json();
             if (data.models && Array.isArray(data.models)) {
-                // Populate select
+                // Populate select with search functionality
                 modelSelect.innerHTML = '';
                 data.models.forEach(model => {
                     const option = document.createElement('option');
@@ -585,18 +868,25 @@ async function loadModels() {
                     modelSelect.appendChild(option);
                 });
                 
-                // Populate models tab
+                // Add search functionality
+                setupModelSearch();
+                
+                // Populate models tab with enhanced cards
                 if (modelsList) {
                     modelsList.innerHTML = '';
                     data.models.forEach(model => {
                         const card = document.createElement('div');
-                        card.className = 'model-card';
+                        card.className = 'model-card holographic';
                         card.innerHTML = `
                             <div class="model-icon">🤖</div>
                             <div class="model-info">
                                 <h4>${model.name || model.id}</h4>
                                 <p class="model-id">${model.id}</p>
                                 <p class="model-desc">${model.description || 'No description available'}</p>
+                                <div class="model-meta">
+                                    <span class="model-tag">${getModelTypeTag(model)}</span>
+                                    <button class="btn-sm model-select-btn" onclick="selectModel('${model.id}')">Select</button>
+                                </div>
                             </div>
                         `;
                         modelsList.appendChild(card);
@@ -612,6 +902,58 @@ async function loadModels() {
         }
     }
 }
+
+// Setup model search functionality
+function setupModelSearch() {
+    const modelSelect = document.getElementById('model');
+    if (!modelSelect) return;
+    
+    // Add search input
+    const searchWrapper = document.createElement('div');
+    searchWrapper.className = 'model-search-wrapper';
+    
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Search models...';
+    searchInput.className = 'model-search';
+    
+    searchWrapper.appendChild(searchInput);
+    modelSelect.parentNode.insertBefore(searchWrapper, modelSelect);
+    
+    // Filter models based on search
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        const options = modelSelect.options;
+        
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            const text = option.textContent.toLowerCase();
+            
+            if (text.includes(searchTerm)) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Get model type tag
+function getModelTypeTag(model) {
+    const id = model.id || '';
+    if (id.includes('mistral')) return 'Mistral';
+    if (id.includes('llama')) return 'Llama';
+    if (id.includes('gpt')) return 'GPT';
+    return 'Custom';
+}
+
+// Select model from card
+window.selectModel = function(modelId) {
+    const modelSelect = document.getElementById('model');
+    modelSelect.value = modelId;
+    showMessage(`Model ${modelId} selected`, 'success');
+    switchTab('chat');
+};
 
 // Load conversation history
 function loadHistory() {
