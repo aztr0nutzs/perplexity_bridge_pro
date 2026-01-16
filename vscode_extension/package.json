@@ -1,0 +1,43 @@
+
+{
+"name":"perplexity-bridge",
+"displayName":"Perplexity Bridge",
+"description":"Connect to Perplexity Bridge API from VSCode",
+"version":"1.0.0",
+"engines":{"vscode":"^1.70.0"},
+"activationEvents":["onCommand:perplexity.ask"],
+"contributes":{
+"commands":[{"command":"perplexity.ask","title":"Ask Perplexity"}],
+"configuration":{
+"title":"Perplexity Bridge",
+"properties":{
+"perplexityBridge.url":{
+"type":"string",
+"default":"http://localhost:7860",
+"description":"Perplexity Bridge API URL"
+},
+"perplexityBridge.apiKey":{
+"type":"string",
+"default":"dev-secret",
+"description":"Perplexity Bridge API Key",
+"scope":"application"
+},
+"perplexityBridge.model":{
+"type":"string",
+"default":"mistral-7b-instruct",
+"description":"Default model to use",
+"enum":[
+"mistral-7b-instruct",
+"llama-3.1-sonar-small-128k-online",
+"llama-3.1-sonar-large-128k-online",
+"llama-3.1-sonar-huge-128k-online"
+]
+}
+}
+}
+},
+"main":"./extension.js",
+"dependencies":{
+"axios":"^1.6.0"
+}
+}

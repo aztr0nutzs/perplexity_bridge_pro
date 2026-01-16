@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perplexity Bridge - Advanced Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1>⚡ Perplexity Bridge</h1>
+            <div class="header-controls">
+                <span id="connectionStatus" class="status-indicator" title="Connection Status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </span>
+                <button id="themeToggle" class="icon-btn" title="Toggle Theme">🌙</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Messages -->
+    <div id="message" class="message" style="display: none;"></div>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="chat">
+            <span>💬</span> Chat
+        </button>
+        <button class="tab-btn" data-tab="history">
+            <span>📚</span> History
+        </button>
+        <button class="tab-btn" data-tab="settings">
+            <span>⚙️</span> Settings
+        </button>
+        <button class="tab-btn" data-tab="models">
+            <span>🤖</span> Models
+        </button>
+        <button class="tab-btn" data-tab="stats">
+            <span>📊</span> Statistics
+        </button>
+    </nav>
+
+    <!-- Chat Tab -->
+    <div id="chat-tab" class="tab-content active">
+        <div class="chat-container">
+            <!-- Conversation Area -->
+            <div class="conversation-area">
+                <div id="conversation" class="conversation"></div>
+                
+                <!-- Input Area -->
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="prompt" 
+                            placeholder="Ask anything... (Ctrl+Enter to send, Ctrl+/ for shortcuts)"
+                            rows="3"
+                        ></textarea>
+                        <div class="input-actions">
+                            <button id="clearBtn" class="icon-btn" title="Clear Conversation">🗑️</button>
+                            <button id="copyBtn" class="icon-btn" title="Copy Last Response">📋</button>
+                            <button id="exportBtn" class="icon-btn" title="Export Conversation">💾</button>
+                            <button id="sendBtn" class="send-btn" onclick="send()">
+                                <span class="btn-text">Send</span>
+                                <span class="btn-icon">➤</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Options Bar -->
+                    <div class="quick-options">
+                        <select id="model" class="model-select" title="Select Model"></select>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="streaming">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Stream</span>
+                        </label>
+                        <button id="advancedToggle" class="link-btn">⚡ Advanced Options</button>
+                    </div>
+                    
+                    <!-- Advanced Options Panel -->
+                    <div id="advancedOptions" class="advanced-panel" style="display: none;">
+                        <div class="option-group">
+                            <label for="temperature">
+                                Temperature: <span id="tempValue">0.0</span>
+                            </label>
+                            <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.0">
+                            <small>Controls randomness (0 = deterministic, 2 = creative)</small>
+                        </div>
+                        <div class="option-group">
+                            <label for="maxTokens">
+                                Max Tokens: <span id="tokensValue">1024</span>
+                            </label>
+                            <input type="range" id="maxTokens" min="1" max="4096" step="1" value="1024">
+                            <small>Maximum tokens to generate (1-4096)</small>
+                        </div>
+                        <div class="option-group">
+                            <label for="frequencyPenalty">
+                                Frequency Penalty: <span id="freqValue">1.0</span>
+                            </label>
+                            <input type="range" id="frequencyPenalty" min="-2" max="2" step="0.1" value="1.0">
+                            <small>Reduce repetition (-2.0 to 2.0)</small>
+                        </div>
+                        <div class="option-group">
+                            <label for="systemPrompt">
+                                System Prompt (Optional)
+                            </label>
+                            <textarea id="systemPrompt" placeholder="Optional system prompt..." rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="history-tab" class="tab-content">
+        <div class="history-container">
+            <div class="section-header">
+                <h2>Conversation History</h2>
+                <div class="section-actions">
+                    <button id="clearHistoryBtn" class="btn-secondary">Clear All</button>
+                    <button id="exportAllBtn" class="btn-secondary">Export All</button>
+                </div>
+            </div>
+            <div id="historyList" class="history-list">
+                <div class="empty-state">No conversations yet. Start chatting to see history here.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="settings-tab" class="tab-content">
+        <div class="settings-container">
+            <div class="settings-section">
+                <h3>🔗 Connection Settings</h3>
+                <div class="form-group">
+                    <label for="url">Bridge URL</label>
+                    <input id="url" type="text" placeholder="http://localhost:7860" value="http://localhost:7860">
+                    <small>URL of the Perplexity Bridge server</small>
+                </div>
+                <div class="form-group">
+                    <label for="key">API Key</label>
+                    <input id="key" type="password" placeholder="Your bridge secret key" value="dev-secret">
+                    <small>Secret key for authentication</small>
+                </div>
+                <button onclick="save()" class="btn-primary">Save Connection Settings</button>
+            </div>
+
+            <div class="settings-section">
+                <h3>🎨 Display Settings</h3>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="markdownRender">
+                        <span>Render Markdown in responses</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoSave">
+                        <span>Auto-save conversations</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showTimestamps">
+                        <span>Show timestamps in chat</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="soundEnabled">
+                        <span>Play sound on response</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>⌨️ Keyboard Shortcuts</h3>
+                <div class="shortcuts-list">
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>Enter</kbd>
+                        <span>Send message</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>/</kbd>
+                        <span>Show shortcuts</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>K</kbd>
+                        <span>Clear conversation</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>L</kbd>
+                        <span>Focus input</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Models Tab -->
+    <div id="models-tab" class="tab-content">
+        <div class="models-container">
+            <div class="section-header">
+                <h2>Available Models</h2>
+                <button id="refreshModelsBtn" class="btn-secondary">🔄 Refresh</button>
+            </div>
+            <div id="modelsList" class="models-grid">
+                <div class="loading">Loading models...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Tab -->
+    <div id="stats-tab" class="tab-content">
+        <div class="stats-container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalRequests">0</div>
+                        <div class="stat-label">Total Requests</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalMessages">0</div>
+                        <div class="stat-label">Total Messages</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔢</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalTokens">0</div>
+                        <div class="stat-label">Est. Tokens</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalTime">0s</div>
+                        <div class="stat-label">Response Time</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-section">
+                <h3>Recent Activity</h3>
+                <div id="activityLog" class="activity-log">
+                    <div class="empty-state">No activity yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
