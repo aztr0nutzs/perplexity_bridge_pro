@@ -1,253 +1,351 @@
+![Perplexity Bridge Header](assets/per_api_header.png)
+
 # Perplexity Bridge Pro
 
-A FastAPI-based proxy bridge for the Perplexity AI API with rate limiting, WebSocket streaming support, web UI, and VSCode extension integration.
+## Introduction
 
-## Features
+**Perplexity Bridge Pro** is a powerful, open-source FastAPI-based proxy bridge that connects seamlessly to the Perplexity AI API. This project provides a robust intermediary layer with advanced features like rate limiting, real-time WebSocket streaming, a modern web-based dashboard, and integrated development tools including a VSCode extension and Python adapters.
 
-- ✅ **REST API** - Standard HTTP POST endpoint for chat completions
-- ✅ **WebSocket Streaming** - Real-time streaming responses via WebSocket
-- ✅ **Rate Limiting** - Configurable rate limiting (default: 10 requests/minute per IP)
-- ✅ **Web UI** - Built-in dashboard for testing and interaction
-- ✅ **VSCode Extension** - Integrated VSCode extension for quick queries
-- ✅ **Roo Adapter** - Python adapter for easy integration
-- ✅ **Authentication** - API key-based authentication
-- ✅ **Error Handling** - Comprehensive error handling and logging
-- ✅ **CORS Support** - Configured for cross-origin requests
-- ✅ **Health Checks** - Health check endpoint for monitoring
+### Purpose and Overview
 
-## Prerequisites
+The primary purpose of Perplexity Bridge Pro is to simplify and enhance the integration of Perplexity AI's powerful language models into various applications and workflows. By acting as a bridge, it offers:
 
-- Python 3.8 or higher
-- Perplexity AI API Key ([Get one here](https://www.perplexity.ai/settings/api))
-- Node.js 14+ (for VSCode extension development, optional)
+- **Unified API Access**: Standardized endpoints for chat completions and model management
+- **Enhanced Security**: API key management and rate limiting to prevent abuse
+- **Developer-Friendly Tools**: Web UI for testing, VSCode extension for quick queries, and Python adapters for easy integration
+- **Real-Time Capabilities**: WebSocket streaming for live, interactive conversations
+- **Cross-Platform Support**: Works on Windows, macOS, Linux, and web browsers
 
-## Installation
+Whether you're a developer building AI-powered applications, a researcher exploring language models, or an enthusiast experimenting with AI, Perplexity Bridge Pro provides the tools and infrastructure to make integration smooth and efficient.
 
-### 🚀 Quick Start (Recommended)
+## Features and Capabilities
 
-**For detailed installation instructions, see [INSTALL.md](INSTALL.md)**
+### Core Features
 
-#### Windows:
-1. Double-click `install_windows.bat`
-2. Edit `.env` file and add your `PERPLEXITY_API_KEY`
-3. Double-click `Launch Perplexity Bridge.vbs` or `start.bat`
+- **REST API**: Standard HTTP POST endpoint for chat completions with full OpenAI-compatible formatting
+- **WebSocket Streaming**: Real-time, bidirectional streaming for interactive conversations
+- **Rate Limiting**: Configurable per-IP rate limiting (default: 10 requests/minute) to manage API usage
+- **Authentication**: Secure API key-based authentication system
+- **Health Monitoring**: Built-in health check endpoints for system monitoring and uptime tracking
 
-#### Linux:
-```bash
-chmod +x install.sh && ./install.sh
-nano .env  # Add your PERPLEXITY_API_KEY
-./start.sh
-```
+### Advanced Options
 
-The browser will automatically open to the UI!
+- **Multiple Model Support**: Access to various Perplexity models including Mistral, Llama 3.1 variants
+- **Advanced Parameters**: Fine-tune responses with temperature, max tokens, frequency penalty controls
+- **System Prompts**: Customizable system prompts for specialized use cases
+- **Conversation History**: Persistent chat history with export capabilities
+- **Favorites System**: Save and manage favorite conversations and prompts
 
-### 📋 Manual Installation
+### Integrations
 
-1. **Clone the repository**
+- **Web UI Dashboard**: Modern, responsive web interface for testing and managing interactions
+- **VSCode Extension**: Integrated extension for querying Perplexity directly from VSCode
+- **Python Roo Adapter**: Easy-to-use Python library for seamless integration into Python projects
+- **Cross-Origin Support**: CORS-enabled for web application integrations
+
+### Additional Capabilities
+
+- **Error Handling**: Comprehensive error handling with detailed logging and user-friendly messages
+- **Statistics Tracking**: Real-time usage statistics and performance metrics
+- **Export Functionality**: Export conversations and data in various formats
+- **Theme Support**: Light and dark theme options for the web interface
+- **Responsive Design**: Mobile-friendly interface that works across all devices
+
+## Installation and Setup
+
+### Prerequisites
+
+Before installing Perplexity Bridge Pro, ensure you have:
+
+- **Python 3.8 or higher** installed on your system
+- **Perplexity AI API Key**: Obtain one from [Perplexity AI Settings](https://www.perplexity.ai/settings/api)
+- **Node.js 14+** (optional, required only for VSCode extension development)
+
+### Quick Start Installation
+
+For the fastest setup experience, use our automated installers:
+
+#### Windows
+
+1. Download or clone the repository
+2. Double-click `install_windows.bat` to install dependencies
+3. Edit the generated `.env` file and add your `PERPLEXITY_API_KEY`
+4. Double-click `Launch Perplexity Bridge.vbs` or `start.bat` to start the application
+
+The web UI will automatically open in your default browser at `http://localhost:7860`.
+
+#### macOS
+
+1. Open Terminal and navigate to the project directory
+2. Run the installation script:
    ```bash
-   git clone <repository-url>
+   chmod +x install.sh && ./install.sh
+   ```
+3. Edit `.env` file with your API key:
+   ```bash
+   nano .env  # Add PERPLEXITY_API_KEY=your_key_here
+   ```
+4. Start the application:
+   ```bash
+   ./start.sh
+   ```
+
+#### Linux
+
+1. Open a terminal in the project directory
+2. Make scripts executable and run installation:
+   ```bash
+   chmod +x install.sh start.sh
+   ./install.sh
+   ```
+3. Configure environment:
+   ```bash
+   nano .env  # Add your PERPLEXITY_API_KEY
+   ```
+4. Launch the application:
+   ```bash
+   ./start.sh
+   ```
+
+#### Web Browsers (Browser Extension)
+
+Perplexity Bridge Pro runs as a web application and works in all modern browsers including Chrome, Firefox, Safari, and Edge.
+
+### Manual Installation
+
+For advanced users or custom deployments:
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/yourusername/perplexity_bridge_pro.git
    cd perplexity_bridge_pro
    ```
 
-2. **Install Python dependencies**
+2. **Create Virtual Environment** (recommended)
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Set up environment variables**
+4. **Configure Environment Variables**
    ```bash
-   # Copy the example file
    cp env.example .env
-   
-   # Edit .env and add your Perplexity API key
+   # Edit .env with your settings:
    # PERPLEXITY_API_KEY=your_api_key_here
    # BRIDGE_SECRET=your_secure_secret_here
    ```
 
-   Or export directly:
+5. **Start the Server**
    ```bash
-   export PERPLEXITY_API_KEY=your_api_key_here
-   export BRIDGE_SECRET=your_secure_secret_here  # Optional, defaults to "dev-secret"
+   uvicorn app:app --host 0.0.0.0 --port 7860
    ```
 
-## Usage
+### Docker Installation (Coming Soon)
 
-### Starting the Server
+Docker support is planned for future releases to enable containerized deployments.
 
-```bash
-uvicorn app:app --host 0.0.0.0 --port 7860
-```
+## Usage Guides
 
-The server will start on `http://localhost:7860` by default.
+### Getting Started
 
-### Web UI
+After installation, access the web UI at `http://localhost:7860`. The interface provides an intuitive dashboard for interacting with Perplexity AI models.
 
-The UI is automatically served and the browser opens when you run `start.py` or `start.bat`/`start.sh`.
+#### Basic Chat Interface
 
-Manual access:
-- Main UI: `http://localhost:7860/` (redirects to UI)
-- Direct UI: `http://localhost:7860/ui/`
+1. **Select a Model**: Choose from available models in the dropdown (e.g., Mistral 7B, Llama 3.1 variants)
+2. **Enter Your Prompt**: Type your question or prompt in the text area
+3. **Configure Options**: Adjust temperature, max tokens, and other parameters as needed
+4. **Send Message**: Click send or press Ctrl+Enter
+5. **View Response**: Responses appear in real-time with streaming support
 
-**Features:**
-- Configure API URL and secret key
-- Settings are persisted in browser localStorage
-- Choose between REST or WebSocket streaming
-- Support for multiple models
-- Real-time streaming responses
+#### Advanced Features
 
-### REST API
+- **Streaming Toggle**: Enable/disable real-time streaming for instant responses
+- **System Prompts**: Add custom system prompts for specialized conversations
+- **Conversation History**: Access previous conversations and continue threads
+- **Export Options**: Save conversations as text files or JSON
 
-#### Chat Completions
+### Screenshots
+
+*(Screenshots would be included here showing the web UI, VSCode extension, and various features)*
+
+### Examples
+
+#### Basic Chat Completion
 
 ```bash
 curl -X POST http://localhost:7860/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: your_secret_here" \
+  -H "X-API-KEY: your_bridge_secret" \
   -d '{
     "model": "mistral-7b-instruct",
     "messages": [
-      {"role": "user", "content": "What is Python?"}
-    ]
+      {"role": "user", "content": "Explain quantum computing in simple terms"}
+    ],
+    "max_tokens": 500,
+    "temperature": 0.7
   }'
 ```
 
-#### Get Available Models
-
-```bash
-curl http://localhost:7860/models
-```
-
-#### Health Check
-
-```bash
-curl http://localhost:7860/health
-```
-
-### WebSocket Streaming
+#### WebSocket Streaming Example
 
 ```javascript
-const ws = new WebSocket('ws://localhost:7860/ws/chat?api_key=your_secret_here');
+const ws = new WebSocket('ws://localhost:7860/ws/chat?api_key=your_secret');
 
 ws.onopen = () => {
   ws.send(JSON.stringify({
-    model: 'mistral-7b-instruct',
-    messages: [{ role: 'user', content: 'Tell me about AI' }],
-    stream: true
+    model: 'llama-3.1-sonar-large-128k-online',
+    messages: [{ role: 'user', content: 'What are the latest developments in AI?' }],
+    stream: true,
+    temperature: 0.5
   }));
 };
 
 ws.onmessage = (event) => {
-  console.log('Chunk:', event.data);
+  const data = JSON.parse(event.data);
+  if (data.choices && data.choices[0].delta) {
+    console.log('Chunk:', data.choices[0].delta.content);
+  }
 };
 ```
 
-### Python Roo Adapter
+#### Python Integration
 
 ```python
 from adapters.roo_adapter import RooAdapter
 
-# Initialize adapter
+# Initialize with explicit settings
 adapter = RooAdapter(
     url="http://localhost:7860",
-    api_key="your_secret_here"
+    api_key="your_bridge_secret"
 )
 
-# Query the API
-response = adapter.query("What is machine learning?")
+# Or use environment variables
+import os
+os.environ['ROO_BRIDGE_URL'] = 'http://localhost:7860'
+os.environ['ROO_BRIDGE_KEY'] = 'your_bridge_secret'
+
+adapter = RooAdapter()
+response = adapter.query("What is the capital of France?")
 print(response)
 ```
 
-Or use environment variables:
+### VSCode Extension Usage
 
-```bash
-export ROO_BRIDGE_URL=http://localhost:7860
-export ROO_BRIDGE_KEY=your_secret_here
-```
-
-```python
-from adapters.roo_adapter import RooAdapter
-
-adapter = RooAdapter()  # Uses environment variables
-response = adapter.query("What is Python?")
-```
-
-### VSCode Extension
-
-1. **Install dependencies** (for development):
-   ```bash
-   cd vscode_extension
-   npm install
-   ```
-
-2. **Configure settings** in VSCode:
-   - Open Settings (Ctrl+, / Cmd+,)
+1. **Install the Extension**: Use the provided `.vsix` file or publish to marketplace
+2. **Configure Settings**:
+   - Open VSCode Settings (Ctrl+,)
    - Search for "Perplexity Bridge"
-   - Set:
-     - `perplexityBridge.url`: Your bridge URL (default: `http://localhost:7860`)
-     - `perplexityBridge.apiKey`: Your API secret key
-     - `perplexityBridge.model`: Default model to use
+   - Set URL, API key, and default model
+3. **Use Commands**:
+   - Press `Ctrl+Shift+P` (Cmd+Shift+P on Mac)
+   - Type "Ask Perplexity" and select
+   - Enter your question in the input box
 
-3. **Use the extension**:
-   - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
-   - Type "Ask Perplexity"
-   - Enter your question
+### Troubleshooting
 
-## API Reference
+#### Common Issues
+
+**"PERPLEXITY_API_KEY environment variable is required"**
+- Ensure you've set the `PERPLEXITY_API_KEY` in your `.env` file or environment variables
+- Restart the application after making changes
+
+**"Unauthorized" errors**
+- Verify the `X-API-KEY` header matches your `BRIDGE_SECRET`
+- Check for typos in API keys
+
+**CORS errors in browser**
+- Ensure the bridge server is running on the correct port
+- Check CORS configuration in `app.py` for production deployments
+
+**Rate limit exceeded**
+- Default limit is 10 requests per minute per IP
+- Wait for the limit to reset or adjust `RATE_LIMIT` in `config.py`
+
+**Connection refused**
+- Verify the server is running on the expected port (default: 7860)
+- Check firewall settings and network configuration
+
+**WebSocket connection fails**
+- Ensure you're using the correct WebSocket URL: `ws://localhost:7860/ws/chat`
+- Include `api_key` as query parameter or `X-API-KEY` header
+
+#### Performance Tips
+
+- Use streaming for better responsiveness with long responses
+- Adjust `max_tokens` based on your needs to control response length
+- Lower temperature values (0.0-0.3) for more deterministic responses
+- Higher temperature values (0.7-1.0) for more creative outputs
+
+## API Documentation
+
+### Authentication
+
+All API endpoints (except health and models) require authentication via the `X-API-KEY` header:
+
+```
+X-API-KEY: your_bridge_secret
+```
 
 ### Endpoints
 
 #### `POST /v1/chat/completions`
-Chat completion endpoint.
 
-**Headers:**
-- `X-API-KEY`: Your bridge secret key (required)
-- `Content-Type`: application/json
+Main chat completion endpoint compatible with OpenAI API format.
 
-**Request Body:**
+**Parameters:**
+- `model` (string, required): Model ID (e.g., "mistral-7b-instruct")
+- `messages` (array, required): Array of message objects with `role` and `content`
+- `stream` (boolean, optional): Enable streaming responses (default: false)
+- `max_tokens` (integer, optional): Maximum tokens to generate (1-4096, default: 1024)
+- `temperature` (float, optional): Sampling temperature (0.0-2.0, default: 0.0)
+- `frequency_penalty` (float, optional): Frequency penalty (-2.0-2.0, default: 1.0)
+
+**Example Request:**
 ```json
 {
-  "model": "string (required)",
+  "model": "mistral-7b-instruct",
   "messages": [
-    {
-      "role": "user|assistant|system",
-      "content": "string"
-    }
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Hello, how are you?"}
   ],
   "stream": false,
-  "max_tokens": 1024,
-  "temperature": 0.0,
-  "frequency_penalty": 1.0
+  "max_tokens": 150,
+  "temperature": 0.7
 }
 ```
 
 **Response:**
 ```json
 {
-  "choices": [
-    {
-      "message": {
-        "role": "assistant",
-        "content": "Response text..."
-      }
-    }
-  ]
-}
-```
-
-#### `GET /health`
-Health check endpoint (no authentication required).
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "service": "perplexity-bridge",
-  "version": "1.0.0"
+  "id": "chatcmpl-123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "mistral-7b-instruct",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Hello! I'm doing well, thank you for asking. How can I help you today?"
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 13,
+    "completion_tokens": 17,
+    "total_tokens": 30
+  }
 }
 ```
 
 #### `GET /models`
-Get available models (no authentication required).
+
+Retrieve available models.
 
 **Response:**
 ```json
@@ -257,123 +355,225 @@ Get available models (no authentication required).
       "id": "mistral-7b-instruct",
       "name": "Mistral 7B Instruct",
       "description": "7B parameter instruction-tuned model"
+    },
+    {
+      "id": "llama-3.1-sonar-small-128k-online",
+      "name": "Llama 3.1 Sonar Small (128k)",
+      "description": "Small model with 128k context window and online capabilities"
     }
   ]
 }
 ```
 
+#### `GET /health`
+
+Health check endpoint.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "service": "perplexity-bridge",
+  "version": "1.0.0",
+  "uptime": "1h 23m 45s"
+}
+```
+
 #### `WS /ws/chat`
-WebSocket endpoint for streaming.
 
-**Query Parameters:**
-- `api_key`: Your bridge secret key
+WebSocket endpoint for real-time streaming.
 
-**Message Format:** Same as REST API request body
+**Connection:** `ws://localhost:7860/ws/chat?api_key=your_secret`
 
-**Response:** Server-Sent Events (SSE) format chunks
+**Message Format:** Same as REST API request body with `stream: true`
 
-## Configuration
+**Response Format:** Server-Sent Events with JSON chunks
 
-### Environment Variables
+### Error Codes
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `PERPLEXITY_API_KEY` | Yes | - | Your Perplexity AI API key |
-| `BRIDGE_SECRET` | No | `dev-secret` | Secret key for bridge authentication |
-| `ROO_BRIDGE_URL` | No | `http://localhost:7860` | Bridge URL for RooAdapter |
-| `ROO_BRIDGE_KEY` | No | `dev-secret` | API key for RooAdapter |
+- `400`: Bad Request - Invalid parameters
+- `401`: Unauthorized - Invalid or missing API key
+- `429`: Too Many Requests - Rate limit exceeded
+- `500`: Internal Server Error - Server-side issues
+- `502`: Bad Gateway - Perplexity API errors
 
-### Rate Limiting
+## Supported Environments and Use Cases
 
-Default rate limit: **10 requests per minute per IP address**
+### Supported Environments
 
-To modify, edit `config.py`:
-```python
-RATE_LIMIT = "20/minute"  # Adjust as needed
-```
+- **Operating Systems**: Windows 10+, macOS 10.15+, Linux (Ubuntu 18.04+, CentOS 7+)
+- **Web Browsers**: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
+- **Python Versions**: 3.8, 3.9, 3.10, 3.11
+- **Development Environments**: VSCode, PyCharm, Jupyter, command line
 
-### CORS Configuration
+### Use Cases
 
-Edit `app.py` to restrict CORS origins for production:
-```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://yourdomain.com"],  # Specify allowed origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-```
+#### Development and Prototyping
 
-## Security Notes
+- **API Testing**: Use the web UI to test Perplexity API integrations
+- **Rapid Prototyping**: Quickly build and test AI-powered features
+- **Debugging**: Monitor API calls and responses with detailed logging
 
-⚠️ **Important for Production:**
+#### Production Applications
 
-1. **Never use default secrets** - Always set a strong `BRIDGE_SECRET`
-2. **Restrict CORS origins** - Don't use `allow_origins=["*"]` in production
-3. **Use HTTPS** - Run behind a reverse proxy (nginx, Apache) with SSL
-4. **Environment variables** - Store secrets securely, never commit `.env` files
-5. **Rate limiting** - Adjust based on your usage and API limits
+- **Chatbots**: Build conversational AI applications
+- **Content Generation**: Automated content creation and summarization
+- **Research Tools**: Academic research and data analysis
+- **Educational Platforms**: Interactive learning and tutoring systems
 
-## Development
+#### Integration Scenarios
 
-### Running in Development Mode
+- **Web Applications**: Frontend apps needing AI capabilities
+- **Mobile Apps**: Backend services for mobile AI features
+- **Desktop Applications**: Standalone tools with AI assistance
+- **IoT Devices**: Smart devices with voice AI interfaces
 
-```bash
-uvicorn app:app --reload --host 0.0.0.0 --port 7860
-```
+#### Limitations
 
-### Project Structure
+- **Rate Limits**: Subject to Perplexity API limits and bridge rate limiting
+- **Context Window**: Limited by selected model capabilities
+- **Internet Required**: Requires active internet for Perplexity API access
+- **API Costs**: Usage incurs costs based on Perplexity API pricing
 
-```
-perplexity_bridge_pro/
-├── app.py                 # Main FastAPI application
-├── config.py              # Configuration and validation
-├── rate_limit.py          # Rate limiting setup
-├── requirements.txt       # Python dependencies
-├── env.example            # Environment variable template
-├── README.md              # This file
-├── adapters/
-│   └── roo_adapter.py    # Python adapter for easy integration
-├── ui/
-│   ├── index.html        # Web UI
-│   ├── app.js            # UI JavaScript
-│   └── style.css         # UI styles
-└── vscode_extension/
-    ├── extension.js      # VSCode extension code
-    └── package.json      # Extension manifest
-```
+## Contribution Guidelines
 
-## Troubleshooting
+We welcome contributions from the community! Here's how you can help improve Perplexity Bridge Pro:
 
-### "PERPLEXITY_API_KEY environment variable is required"
-- Make sure you've set the `PERPLEXITY_API_KEY` environment variable
-- Or created a `.env` file with the key
+### Getting Started
 
-### "Unauthorized" errors
-- Check that you're sending the correct `X-API-KEY` header
-- Verify `BRIDGE_SECRET` matches what you're sending
+1. **Fork the Repository**: Create your own fork on GitHub
+2. **Clone Your Fork**: `git clone https://github.com/yourusername/perplexity_bridge_pro.git`
+3. **Create a Branch**: `git checkout -b feature/your-feature-name`
+4. **Set Up Development Environment**: Follow the installation instructions above
 
-### CORS errors in browser
-- Ensure CORS middleware is properly configured
-- Check that your origin is allowed (if restricted)
+### Development Workflow
 
-### Rate limit errors
-- You've exceeded 10 requests per minute
-- Wait or adjust the rate limit in `config.py`
+1. **Code Standards**:
+   - Follow PEP 8 for Python code
+   - Use meaningful variable and function names
+   - Add docstrings to all functions and classes
+   - Write comprehensive unit tests
 
-### Connection refused (RooAdapter)
-- Make sure the bridge server is running
-- Verify the `ROO_BRIDGE_URL` is correct
+2. **Testing**:
+   - Test your changes thoroughly
+   - Ensure all existing tests pass
+   - Add new tests for new features
 
-## License
+3. **Documentation**:
+   - Update README.md for any new features
+   - Add inline comments for complex logic
+   - Update API documentation if endpoints change
 
-[Your License Here]
+### Submitting Changes
 
-## Contributing
+1. **Commit Messages**: Use clear, descriptive commit messages
+   ```bash
+   git commit -m "Add feature: brief description of changes"
+   ```
 
-[Your Contributing Guidelines Here]
+2. **Pull Request**:
+   - Push your branch to GitHub
+   - Create a pull request with detailed description
+   - Reference any related issues
 
-## Support
+3. **Code Review**:
+   - Address review feedback promptly
+   - Make requested changes and push updates
 
-For issues, questions, or contributions, please [open an issue](https://github.com/yourusername/perplexity_bridge_pro/issues).
+### Areas for Contribution
+
+- **Bug Fixes**: Identify and fix issues
+- **Feature Enhancements**: Add new capabilities
+- **Documentation**: Improve guides and examples
+- **Testing**: Write and maintain test suites
+- **Performance**: Optimize for speed and efficiency
+- **UI/UX**: Enhance the web interface
+- **Integrations**: Add support for new platforms
+
+### Code of Conduct
+
+- Be respectful and inclusive
+- Provide constructive feedback
+- Help newcomers learn and contribute
+- Follow our community guidelines
+
+## Licensing Information
+
+Perplexity Bridge Pro is licensed under the MIT License.
+
+### MIT License
+
+Copyright (c) 2024 Perplexity Bridge Pro Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+### Third-Party Licenses
+
+This project uses the following third-party libraries:
+
+- **FastAPI**: Licensed under MIT
+- **Uvicorn**: Licensed under BSD
+- **httpx**: Licensed under BSD
+- **python-dotenv**: Licensed under BSD
+- **slowapi**: Licensed under MIT
+
+For full license texts, see the respective project repositories.
+
+## FAQ
+
+### General Questions
+
+**Q: What is Perplexity Bridge Pro?**
+A: It's an open-source proxy bridge that provides a standardized interface to Perplexity AI's language models, with additional features like rate limiting, web UI, and developer tools.
+
+**Q: Do I need a Perplexity API key?**
+A: Yes, you need a valid Perplexity AI API key to use this bridge. Get one from their website.
+
+**Q: Is it free to use?**
+A: The bridge software is free and open-source. You'll incur costs based on your Perplexity API usage.
+
+**Q: What's the difference between this and direct Perplexity API access?**
+A: This bridge adds authentication, rate limiting, web UI, streaming support, and developer tools on top of the base API.
+
+### Technical Questions
+
+**Q: Can I run this on my server?**
+A: Yes, you can deploy it on any server that supports Python. For production, consider using a reverse proxy with SSL.
+
+**Q: How do I change the default port?**
+A: Modify the port in your startup command: `uvicorn app:app --host 0.0.0.0 --port YOUR_PORT`
+
+**Q: Can I use this with other AI APIs?**
+A: Currently, it's designed specifically for Perplexity AI. Support for other APIs may be added in future versions.
+
+**Q: How do I backup my conversation history?**
+A: Use the export feature in the web UI or access the browser's localStorage data.
+
+### Troubleshooting
+
+**Q: The web UI won't load. What should I do?**
+A: Check that the server is running on the correct port and that your firewall allows connections.
+
+**Q: I'm getting rate limit errors. How can I fix this?**
+A: Increase the rate limit in `config.py` or wait for the current limit to reset. For high usage, contact Perplexity about API limits.
+
+**Q: The VSCode extension isn't working. What could be wrong?**
+A: Verify your settings in VSCode and ensure the bridge server is running. Check the developer console for error messages.
+
+**Q: How do I update to the latest version?**
+A: Pull the latest changes from the repository and reinstall dependencies: `pip install -r requirements.txt`
+
+### Support
+
+For additional help:
+- Check the [Issues](https://github.com/yourusername/perplexity_bridge_pro/issues) page
+- Review the [Documentation](https://github.com/yourusername/perplexity_bridge_pro/wiki)
+- Join our [Community Discussions](https://github.com/yourusername/perplexity_bridge_pro/discussions)
+
+---
+
+*Perplexity Bridge Pro is not affiliated with Perplexity AI. This is an independent project.*

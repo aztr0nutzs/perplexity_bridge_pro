@@ -74,7 +74,12 @@ app.add_middleware(
 ui_dir = Path(__file__).parent / "ui"
 if ui_dir.exists():
     app.mount("/ui", StaticFiles(directory=str(ui_dir)), name="ui")
-    
+
+# Serve assets directory
+assets_dir = Path(__file__).parent / "assets"
+if assets_dir.exists():
+    app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
     @app.get("/")
     async def root():
         """Redirect root to UI."""

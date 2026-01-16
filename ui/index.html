@@ -11,6 +11,7 @@
     <!-- Header -->
     <header class="app-header">
         <div class="header-content">
+            <img src="/assets/per_api_header.png" alt="Perplexity Bridge Header" class="header-logo">
             <h1>⚡ Perplexity Bridge</h1>
             <div class="header-controls">
                 <span id="connectionStatus" class="status-indicator" title="Connection Status">
@@ -98,6 +99,9 @@
                     
                     <!-- Quick Options Bar -->
                     <div class="quick-options">
+                        <div class="model-search-wrapper">
+                            <input type="text" class="model-search" placeholder="Search models...">
+                        </div>
                         <select id="model" class="model-select" title="Select Model"></select>
                         <label class="toggle-switch">
                             <input type="checkbox" id="streaming">

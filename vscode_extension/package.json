@@ -4,6 +4,9 @@
 "displayName":"Perplexity Bridge",
 "description":"Connect to Perplexity Bridge API from VSCode",
 "version":"1.0.0",
+"publisher":"example-publisher",
+"icon":"perp_api_icon.png",
+"categories":["Other"],
 "engines":{"vscode":"^1.70.0"},
 "activationEvents":["onCommand:perplexity.ask"],
 "contributes":{
