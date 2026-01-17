@@ -1,18 +1,17 @@
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, validator
 from typing import List, Dict, Optional, Union
+import asyncio
 import httpx
 import json
 import logging
 import os
-import sys
-import webbrowser
-import threading
 import time
+import shlex
 from pathlib import Path
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -70,6 +69,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Paths
+PROJECT_ROOT = Path(__file__).parent.resolve()
+UI_FILE = PROJECT_ROOT / "ui" / "perplex_index2.html"
+
 # Serve static files from ui directory
 ui_dir = Path(__file__).parent / "ui"
 if ui_dir.exists():
@@ -80,10 +83,12 @@ assets_dir = Path(__file__).parent / "assets"
 if assets_dir.exists():
     app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
 
-    @app.get("/")
-    async def root():
-        """Redirect root to UI."""
-        return FileResponse(str(ui_dir / "index.html"))
+@app.get("/")
+async def root():
+    """Serve the main UI."""
+    if UI_FILE.exists():
+        return FileResponse(str(UI_FILE))
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="UI not found")
 
 
 class Message(BaseModel):
@@ -113,6 +118,10 @@ class ChatReq(BaseModel):
     max_tokens: int = Field(1024, ge=1, le=4096, description="Maximum tokens to generate")
     temperature: float = Field(0.0, ge=0.0, le=2.0, description="Sampling temperature")
     frequency_penalty: float = Field(1, ge=-2.0, le=2.0, description="Frequency penalty")
+    tools: Optional[List[Dict[str, Union[str, Dict, List]]]] = Field(
+        default=None,
+        description="Optional tools configuration"
+    )
     
     @validator('model')
     def validate_model(cls, v):
@@ -129,7 +138,7 @@ class ChatReq(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "model": "mistral-7b-instruct",
                 "messages": [
@@ -142,6 +151,19 @@ class ChatReq(BaseModel):
             }
         }
 
+class TerminalReq(BaseModel):
+    """Terminal execution request."""
+    command: str = Field(..., description="Shell command to execute")
+
+
+def get_perplexity_key() -> str:
+    if not PERPLEXITY_KEY or not PERPLEXITY_KEY.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="PERPLEXITY_API_KEY is not configured on the server"
+        )
+    return PERPLEXITY_KEY.strip()
+
 
 @app.middleware("http")
 async def auth(req: Request, call_next):
@@ -150,7 +172,13 @@ async def auth(req: Request, call_next):
     public_paths = [
         "/", "/health", "/models", "/docs", "/openapi.json", "/redoc"
     ]
-    if req.url.path in public_paths or req.url.path.startswith("/ui/"):
+    if (
+        req.url.path in public_paths
+        or req.url.path.startswith("/ui/")
+        or req.url.path == "/ui"
+        or req.url.path.startswith("/assets/")
+        or req.url.path == "/assets"
+    ):
         return await call_next(req)
     
     api_key = req.headers.get("X-API-KEY")
@@ -202,7 +230,17 @@ async def get_models():
             "description": "Huge model with 128k context window and online capabilities"
         }
     ]
-    return {"models": models}
+    data = [
+        {
+            "id": m["id"],
+            "name": m["name"],
+            "description": m["description"],
+            "owned_by": "perplexity",
+            "object": "model"
+        }
+        for m in models
+    ]
+    return {"models": models, "data": data}
 
 
 @app.post("/v1/chat/completions")
@@ -242,14 +280,38 @@ async def chat(req: ChatReq, request: Request):
     ```
     """
     try:
+        key = get_perplexity_key()
         headers = {
-            "Authorization": f"Bearer {PERPLEXITY_KEY}",
+            "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
         
         request_data = req.dict()
         logger.info(f"Processing chat request with model: {req.model}")
+
+        if req.stream:
+            async def stream_response():
+                async with httpx.AsyncClient(timeout=120.0) as client:
+                    async with client.stream(
+                        "POST",
+                        BASE_URL,
+                        json=request_data,
+                        headers=headers
+                    ) as response:
+                        if response.status_code >= 400:
+                            error_text = await response.aread()
+                            error_payload = json.dumps({
+                                "error": f"Perplexity API error: {error_text.decode(errors='replace')}",
+                                "type": "error"
+                            })
+                            yield f"data: {error_payload}\n\n"
+                            return
+                        async for chunk in response.aiter_text():
+                            if chunk:
+                                yield chunk
+
+            return StreamingResponse(stream_response(), media_type="text/event-stream")
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
@@ -401,8 +463,17 @@ async def ws_chat(websocket: WebSocket):
                 # Ensure stream is True
                 payload["stream"] = True
                 
+                try:
+                    key = get_perplexity_key()
+                except HTTPException as e:
+                    await websocket.send_text(json.dumps({
+                        "error": e.detail,
+                        "type": "error"
+                    }))
+                    await websocket.close(code=1011, reason="Server configuration error")
+                    return
                 headers = {
-                    "Authorization": f"Bearer {PERPLEXITY_KEY}",
+                    "Authorization": f"Bearer {key}",
                     "Content-Type": "application/json"
                 }
                 
@@ -459,3 +530,135 @@ async def ws_chat(websocket: WebSocket):
             await websocket.close()
         except:
             pass
+
+
+def _validate_terminal_command(command: str) -> List[str]:
+    if not command or not command.strip():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Command cannot be empty")
+    if len(command) > 200:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Command too long")
+    if any(token in command for token in ["&&", "||", ";", "|", "`", "$(", ">", "<"]):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported shell operators")
+
+    args = shlex.split(command)
+    if not args:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid command")
+
+    allowlist = {
+        "echo", "printf", "pwd", "ls", "dir", "whoami", "date", "uname",
+        "cat", "head", "tail", "sed", "awk", "rg", "find",
+        "sleep", "wc", "sort", "uniq", "grep"
+    }
+    cmd = args[0]
+    if cmd not in allowlist:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Command not allowed: {cmd}")
+
+    for arg in args[1:]:
+        if "\x00" in arg:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid argument")
+        if arg.startswith(("/", "~", "\\")) or ".." in arg:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Path outside project is not allowed")
+        if len(arg) >= 2 and arg[1] == ":":
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Path outside project is not allowed")
+
+    return args
+
+
+@app.post("/terminal")
+@limiter.limit(RATE_LIMIT)
+async def terminal(req: TerminalReq, request: Request):
+    """Execute a command with streaming output and guardrails."""
+    args = _validate_terminal_command(req.command)
+    max_output_bytes = 64 * 1024
+    timeout_seconds = 8
+    start_time = time.monotonic()
+
+    async def stream_output():
+        nonlocal start_time
+        output_bytes = 0
+        proc = await asyncio.create_subprocess_exec(
+            *args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=str(PROJECT_ROOT)
+        )
+
+        async def read_line(stream):
+            return await stream.readline()
+
+        tasks = {
+            asyncio.create_task(read_line(proc.stdout)): "stdout",
+            asyncio.create_task(read_line(proc.stderr)): "stderr"
+        }
+
+        while tasks:
+            if time.monotonic() - start_time > timeout_seconds:
+                proc.kill()
+                yield 'data: {"type":"error","message":"Command timed out"}\n\n'
+                break
+            done, _ = await asyncio.wait(
+                tasks.keys(),
+                timeout=0.1,
+                return_when=asyncio.FIRST_COMPLETED
+            )
+            if not done:
+                if proc.returncode is not None:
+                    break
+                continue
+            for task in done:
+                label = tasks.pop(task)
+                line = task.result()
+                if line:
+                    output_bytes += len(line)
+                    if output_bytes > max_output_bytes:
+                        proc.kill()
+                        yield 'data: {"type":"error","message":"Output limit exceeded"}\n\n'
+                        tasks.clear()
+                        break
+                    payload = json.dumps({
+                        "type": "stream",
+                        "stream": label,
+                        "text": line.decode(errors="replace")
+                    })
+                    yield f"data: {payload}\n\n"
+                    tasks[asyncio.create_task(read_line(getattr(proc, label)))] = label
+
+        try:
+            await asyncio.wait_for(proc.wait(), timeout=1)
+        except asyncio.TimeoutError:
+            proc.kill()
+
+        exit_payload = json.dumps({
+            "type": "exit",
+            "code": proc.returncode if proc.returncode is not None else -1
+        })
+        yield f"data: {exit_payload}\n\n"
+
+    return StreamingResponse(stream_output(), media_type="text/event-stream")
+
+
+@app.get("/project/file")
+@limiter.limit(RATE_LIMIT)
+async def project_file(path: str, request: Request):
+    """Read a project file safely with size limits."""
+    if not path or path.strip() == "":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Path is required")
+    if path.startswith("/") or ".." in path:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid path")
+
+    file_path = (PROJECT_ROOT / path).resolve()
+    if not str(file_path).startswith(str(PROJECT_ROOT)):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Path outside project root")
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+
+    max_bytes = 200 * 1024
+    truncated = False
+    with open(file_path, "rb") as handle:
+        data = handle.read(max_bytes + 1)
+        if len(data) > max_bytes:
+            data = data[:max_bytes]
+            truncated = True
+
+    content = data.decode("utf-8", errors="replace")
+    return {"path": path, "content": content, "truncated": truncated}

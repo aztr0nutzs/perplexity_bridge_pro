@@ -1,10 +1,13 @@
 
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 PERPLEXITY_KEY: Optional[str] = os.getenv("PERPLEXITY_API_KEY")
 BRIDGE_SECRET: str = os.getenv("BRIDGE_SECRET", "dev-secret")
-BASE_URL: str = "https://api.perplexity.ai/chat/completions"
+BASE_URL: str = os.getenv("PERPLEXITY_BASE_URL", "https://api.perplexity.ai/chat/completions")
 RATE_LIMIT: str = "10/minute"
 
 
@@ -22,5 +25,5 @@ def validate_config() -> None:
         )
 
 
-# Validate configuration on import
-validate_config()
+# NOTE: Validation is intentionally not run on import so the server can start
+# and surface configuration errors at request time.

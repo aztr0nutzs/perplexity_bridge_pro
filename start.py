@@ -11,6 +11,8 @@ import logging
 import webbrowser
 import threading
 import subprocess
+import socket
+from dotenv import load_dotenv
 from pathlib import Path
 
 # Add current directory to path
@@ -78,15 +80,27 @@ def open_browser(url, delay=2):
     thread.start()
 
 
+def check_port_available(host: str, port: int) -> bool:
+    """Return True if the port is available."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(1)
+        return sock.connect_ex((host, port)) != 0
+
+
 def start_server():
     """Start the FastAPI server."""
     try:
         import uvicorn
         from config import BRIDGE_SECRET
         
-        host = "127.0.0.1"
-        port = 7860
+        host = os.getenv("BRIDGE_HOST", "127.0.0.1")
+        port = int(os.getenv("BRIDGE_PORT", "7860"))
         url = f"http://{host}:{port}"
+
+        if not check_port_available(host, port):
+            logger.error(f"✗ Port {port} is already in use on {host}")
+            logger.error("Please stop the other process or set BRIDGE_PORT to a free port.")
+            sys.exit(1)
         
         logger.info("=" * 60)
         logger.info("Perplexity Bridge - Starting Server")
@@ -125,6 +139,8 @@ def main():
     """Main entry point."""
     logger.info("Perplexity Bridge - Startup Check")
     logger.info("-" * 60)
+
+    load_dotenv()
     
     # Check dependencies
     if not check_dependencies():

@@ -39,6 +39,12 @@
         linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
         background-size: 40px 40px;
     }
+    body.theme-alt {
+        --neon-pink: #00ffff;
+        --neon-cyan: #ff00ff;
+        --neon-purple: #00aaff;
+        --neon-green: #00ff88;
+    }
 
     /* SCANLINES */
     .scanlines {
@@ -342,6 +348,8 @@
 .projects-layout { display:grid; grid-template-columns: 260px 1fr; gap:16px; align-items:start; }
 .projects-files { background:var(--panel-bg); padding:8px; border-radius:8px; border:var(--glass-border); }
 .projects-editor { background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05)); padding:8px; border-radius:8px; border:var(--glass-border); }
+.file-row.selected { background: rgba(0, 255, 255, 0.08); border-left: 2px solid var(--neon-cyan); }
+#monacoEditor { width:100%; height:320px; margin-top:6px; border-radius:6px; display:none; }
 </style>
 </head>
 <body>
@@ -352,7 +360,7 @@
 <div class="app-container">
     
     <header>
-        <img src="perp_api_header.jpg" alt="PERPLEXITY BRIDGE" class="header-logo">
+        <img src="/assets/perp_api_header.png" alt="PERPLEXITY BRIDGE" class="header-logo">
         
         <div class="header-controls">
             <div id="connectionStatus" class="status-indicator">
@@ -374,42 +382,6 @@
     <main>
         
         <div id="chat-tab" class="tab-content active">
-            
-    <div id="projects-tab" class="tab-content">
-        <h2 style="margin-bottom:10px;">PROJECTS — Code Editor & Terminal</h2>
-        <div class="projects-layout">
-            <div class="projects-files">
-                <div style="padding:8px; font-weight:700;">Files</div>
-                <div id="fileList" style="overflow:auto; padding:6px; height:380px; background:rgba(255,255,255,0.03); border-radius:6px;"></div>
-                <div style="margin-top:8px; display:flex; gap:6px;">
-                    <button class="cyber-btn" id="loadManifestBtn">Load Manifest</button>
-                    <button class="cyber-btn" id="downloadFileBtn">Download File</button>
-                </div>
-            </div>
-            <div class="projects-editor">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="font-weight:700;">Editor</div>
-                    <div id="editorFilename" style="opacity:0.8;">(no file)</div>
-                </div>
-                <textarea id="codeEditor" placeholder="// Open a file to edit. Supports saving to localStorage and downloading." style="width:100%; height:320px; font-family:monospace; font-size:13px; margin-top:6px; border-radius:6px; padding:8px;"></textarea>
-                <div style="margin-top:8px; display:flex; gap:8px;">
-                    <button class="cyber-btn" id="saveEditorBtn">Save (local)</button>
-                    <button class="cyber-btn" id="downloadEditorBtn">Download</button>
-                    <button class="cyber-btn" id="formatCodeBtn">Format (basic)</button>
-                </div>
-                <div style="margin-top:12px;">
-                    <div style="font-weight:700; margin-bottom:4px;">Terminal</div>
-                    <div id="miniTerminal" style="height:140px; overflow:auto; background:#000; color:#0f0; padding:8px; border-radius:6px; font-family:monospace; font-size:13px;"></div>
-                    <div style="display:flex; margin-top:6px;">
-                        <input id="terminalInput" placeholder="Type shell commands (simulated)..." style="flex:1; border-radius:6px; padding:8px; font-family:monospace;">
-                        <button class="cyber-btn" id="terminalSendBtn">Run</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
                 <div class="chat-layout">
                 
                 <div class="sidebar">
@@ -497,6 +469,41 @@
                             </div>
                         </div>
 
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="projects-tab" class="tab-content">
+            <h2 style="margin-bottom:10px;">PROJECTS — Code Editor & Terminal</h2>
+            <div class="projects-layout">
+                <div class="projects-files">
+                    <div style="padding:8px; font-weight:700;">Files</div>
+                    <div id="fileList" style="overflow:auto; padding:6px; height:380px; background:rgba(255,255,255,0.03); border-radius:6px;"></div>
+                    <div style="margin-top:8px; display:flex; gap:6px;">
+                        <button class="cyber-btn" id="loadManifestBtn">Load Manifest</button>
+                        <button class="cyber-btn" id="downloadFileBtn">Download File</button>
+                    </div>
+                </div>
+                <div class="projects-editor">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-weight:700;">Editor</div>
+                        <div id="editorFilename" style="opacity:0.8;">(no file)</div>
+                    </div>
+                    <textarea id="codeEditor" placeholder="// Open a file to edit. Supports saving to localStorage and downloading." style="width:100%; height:320px; font-family:monospace; font-size:13px; margin-top:6px; border-radius:6px; padding:8px;"></textarea>
+                    <div id="monacoEditor"></div>
+                    <div style="margin-top:8px; display:flex; gap:8px;">
+                        <button class="cyber-btn" id="saveEditorBtn">Save (local)</button>
+                        <button class="cyber-btn" id="downloadEditorBtn">Download</button>
+                        <button class="cyber-btn" id="formatCodeBtn">Format (basic)</button>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <div style="font-weight:700; margin-bottom:4px;">Terminal</div>
+                        <div id="miniTerminal" style="height:140px; overflow:auto; background:#000; color:#0f0; padding:8px; border-radius:6px; font-family:monospace; font-size:13px;"></div>
+                        <div style="display:flex; margin-top:6px;">
+                            <input id="terminalInput" placeholder="Type shell commands..." style="flex:1; border-radius:6px; padding:8px; font-family:monospace;">
+                            <button class="cyber-btn" id="terminalSendBtn">Run</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -609,7 +616,6 @@
   "PROJECT_GUIDELINES.MD",
   "PROJECT_RULES.MD",
   "PHASE_COMPLETION_GUIDE.MD",
-  "ui.zip",
   "FUTURE_INTEGRATIONS.MD",
   "adapters/roo_adapter.py",
   "assets/perp_api_header.png",
@@ -997,7 +1003,7 @@
 
 // CONFIGURATION STATE
 let cfg = {
-    url: 'https://api.perplexity.ai',
+    url: window.location.origin,
     key: '',
     useStreaming: false,
     temperature: 0.0,
@@ -1011,6 +1017,11 @@ let cfg = {
     tools: ''
 };
 
+let monacoEditor = null;
+let monacoReady = false;
+let selectedFilePath = '';
+let projectsInitialized = false;
+
 // --- PROJECTS: lightweight file explorer, editor & terminal ---
 function initProjectsUI() {
     const manifestElem = document.getElementById('projectManifest');
@@ -1020,11 +1031,62 @@ function initProjectsUI() {
     }
     window._projectManifest = manifest;
     populateFileList(manifest);
-    document.getElementById('loadManifestBtn').addEventListener('click', ()=> populateFileList(manifest, true));
-    document.getElementById('saveEditorBtn').addEventListener('click', saveEditorLocal);
-    document.getElementById('downloadEditorBtn').addEventListener('click', downloadEditorContent);
-    document.getElementById('formatCodeBtn').addEventListener('click', basicFormatCode);
-    document.getElementById('terminalSendBtn').addEventListener('click', runTerminalCommand);
+    if (!projectsInitialized) {
+        document.getElementById('loadManifestBtn').addEventListener('click', ()=> populateFileList(manifest, true));
+        document.getElementById('downloadFileBtn').addEventListener('click', downloadSelectedFile);
+        document.getElementById('saveEditorBtn').addEventListener('click', saveEditorLocal);
+        document.getElementById('downloadEditorBtn').addEventListener('click', downloadEditorContent);
+        document.getElementById('formatCodeBtn').addEventListener('click', basicFormatCode);
+        document.getElementById('terminalSendBtn').addEventListener('click', runTerminalCommand);
+        document.getElementById('terminalInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                runTerminalCommand();
+            }
+        });
+        initMonacoEditor();
+        projectsInitialized = true;
+    }
+}
+
+function initMonacoEditor() {
+    const host = document.getElementById('monacoEditor');
+    const textarea = document.getElementById('codeEditor');
+    if (!host || monacoReady) return;
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js';
+    script.onload = () => {
+        if (!window.require) return;
+        window.require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+        window.require(['vs/editor/editor.main'], () => {
+            monacoEditor = monaco.editor.create(host, {
+                value: textarea.value || '',
+                language: 'plaintext',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false }
+            });
+            host.style.display = 'block';
+            textarea.style.display = 'none';
+            monacoReady = true;
+        });
+    };
+    script.onerror = () => {
+        monacoReady = false;
+    };
+    document.body.appendChild(script);
+}
+
+function setEditorValue(value) {
+    if (monacoEditor) {
+        monacoEditor.setValue(value);
+    } else {
+        document.getElementById('codeEditor').value = value;
+    }
+}
+
+function getEditorValue() {
+    return monacoEditor ? monacoEditor.getValue() : document.getElementById('codeEditor').value;
 }
 
 function populateFileList(manifest, force=false) {
@@ -1042,7 +1104,10 @@ function populateFileList(manifest, force=false) {
         div.style.borderBottom = '1px dashed rgba(255,255,255,0.03)';
         div.innerText = path;
         div.title = path;
-        div.addEventListener('click', ()=> openProjectFile(path));
+        div.addEventListener('click', () => {
+            setSelectedFile(path, div);
+            openProjectFile(path);
+        });
         el.appendChild(div);
     });
     if(manifest.length > 100) {
@@ -1053,36 +1118,48 @@ function populateFileList(manifest, force=false) {
     }
 }
 
+function setSelectedFile(path, element) {
+    selectedFilePath = path;
+    document.querySelectorAll('.file-row').forEach(row => row.classList.remove('selected'));
+    if (element) element.classList.add('selected');
+}
+
 async function openProjectFile(path) {
-    const editor = document.getElementById('codeEditor');
     const filename = document.getElementById('editorFilename');
     filename.innerText = path;
-    // Try to fetch the file relative to ui folder
-    let url = '../' + path;
+    if(!cfg.key) {
+        showToast("API KEY MISSING", "error");
+        return;
+    }
     try {
-        const res = await fetch(url);
+        const res = await fetch(`${cfg.url}/project/file?path=${encodeURIComponent(path)}`, {
+            headers: { 'X-API-KEY': cfg.key }
+        });
         if(res.ok) {
-            const text = await res.text();
-            editor.value = text;
-            showToast(`Loaded ${path}`);
+            const data = await res.json();
+            setEditorValue(data.content || '');
+            if (data.truncated) {
+                showToast(`Loaded ${path} (truncated)`);
+            } else {
+                showToast(`Loaded ${path}`);
+            }
             return;
         }
-    } catch(e) {
-        // ignore fetch errors
-    }
-    // If fetch failed, try to load from localStorage cache
+        const errText = await res.text();
+        showToast(`LOAD FAILED: ${errText}`, 'error');
+    } catch(e) {}
     const cached = localStorage.getItem('proj_'+path);
     if(cached) {
-        editor.value = cached;
+        setEditorValue(cached);
         showToast(`Loaded ${path} (cached)`);
         return;
     }
-    editor.value = `// Could not load file via fetch. You can paste content here to edit.\n// Path: ${path}`;
+    setEditorValue(`// Could not load file from server.\n// Path: ${path}`);
 }
 
 function saveEditorLocal() {
     const path = document.getElementById('editorFilename').innerText;
-    const content = document.getElementById('codeEditor').value;
+    const content = getEditorValue();
     if(!path || path === '(no file)') {
         showToast('No filename selected to save.');
         return;
@@ -1093,7 +1170,7 @@ function saveEditorLocal() {
 
 function downloadEditorContent() {
     const filename = document.getElementById('editorFilename').innerText || 'untitled.txt';
-    const content = document.getElementById('codeEditor').value || '';
+    const content = getEditorValue() || '';
     const blob = new Blob([content], {type:'text/plain'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1102,21 +1179,28 @@ function downloadEditorContent() {
 }
 
 function basicFormatCode() {
-    const editor = document.getElementById('codeEditor');
-    let v = editor.value;
+    let v = getEditorValue();
     try {
         // naive formatting for JSON or JS
         if(v.trim().startsWith('{') || v.trim().startsWith('[')) {
-            editor.value = JSON.stringify(JSON.parse(v), null, 2);
+            setEditorValue(JSON.stringify(JSON.parse(v), null, 2));
             showToast('Formatted as JSON');
             return;
         }
         // remove trailing spaces
-        editor.value = v.split('\n').map(l=>l.replace(/\s+$/,'' )).join('\n');
+        setEditorValue(v.split('\n').map(l=>l.replace(/\s+$/,'' )).join('\n'));
         showToast('Basic format applied');
     } catch(e) {
         showToast('Format failed: '+e.message);
     }
+}
+
+function downloadSelectedFile() {
+    if (!selectedFilePath || selectedFilePath === '(no file)') {
+        showToast('No file selected.');
+        return;
+    }
+    downloadEditorContent();
 }
 
 function runTerminalCommand() {
@@ -1124,27 +1208,67 @@ function runTerminalCommand() {
     const term = document.getElementById('miniTerminal');
     const cmd = input.value.trim();
     if(!cmd) return;
-    term.innerHTML += `<div>&gt; ${escapeHtml(cmd)}</div>`;
-    // simulated responses
-    if(cmd === 'ls' || cmd === 'dir') {
-        const m = window._projectManifest || [];
-        const items = m.slice(0,20).map(p=>'<div style="margin-left:8px;">'+escapeHtml(p)+'</div>').join('');
-        term.innerHTML += `<div>${items}</div>`;
-    } else if(cmd.startsWith('cat ') || cmd.startsWith('type ')) {
-        const file = cmd.split(' ').slice(1).join(' ');
-        openProjectFile(file).then(()=> {
-            const content = document.getElementById('codeEditor').value;
-            term.innerHTML += `<pre style="white-space:pre-wrap; border-top:1px solid rgba(255,255,255,0.04); padding-top:6px;">${escapeHtml(content.slice(0,2000))}</pre>`;
-        });
-    } else {
-        term.innerHTML += `<div style="opacity:0.8;">(simulated) command not implemented: ${escapeHtml(cmd)}</div>`;
+    if(!cfg.key) {
+        showToast("API KEY MISSING", "error");
+        return;
     }
-    term.scrollTop = term.scrollHeight;
+    appendTerminalLine(`> ${cmd}`);
     input.value = '';
+
+    fetch(`${cfg.url}/terminal`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-API-KEY': cfg.key
+        },
+        body: JSON.stringify({ command: cmd })
+    }).then(async (res) => {
+        if(!res.ok) {
+            const errText = await res.text();
+            appendTerminalLine(`ERROR: ${errText}`, 'error');
+            return;
+        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            lines.forEach(line => {
+                line = line.replace(/\r/g, '');
+                if (line.startsWith('data: ')) {
+                    const payload = line.slice(6);
+                    try {
+                        const msg = JSON.parse(payload);
+                        if (msg.type === 'stream') {
+                            const prefix = msg.stream === 'stderr' ? '[stderr] ' : '';
+                            appendTerminalLine(prefix + msg.text, msg.stream === 'stderr' ? 'stderr' : 'stdout');
+                        } else if (msg.type === 'error') {
+                            appendTerminalLine(`ERROR: ${msg.message}`, 'error');
+                        } else if (msg.type === 'exit') {
+                            appendTerminalLine(`EXIT ${msg.code}`, msg.code === 0 ? 'stdout' : 'error');
+                        }
+                    } catch(e) {
+                        appendTerminalLine(payload, 'stdout');
+                    }
+                }
+            });
+        }
+    }).catch(err => {
+        appendTerminalLine(`ERROR: ${err.message}`, 'error');
+    });
 }
 
-function escapeHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function appendTerminalLine(text, type='stdout') {
+    const term = document.getElementById('miniTerminal');
+    const safe = escapeHtml(text).replace(/\n/g, '<br>');
+    let color = '#0f0';
+    if (type === 'stderr' || type === 'error') color = '#ff6666';
+    term.innerHTML += `<div style="color:${color};">${safe}</div>`;
+    term.scrollTop = term.scrollHeight;
 }
 
 
@@ -1199,6 +1323,8 @@ function loadConfig() {
         const parsed = JSON.parse(saved);
         cfg = { ...cfg, ...parsed }; // Merge
     }
+    if (!cfg.url) cfg.url = window.location.origin;
+    cfg.url = cfg.url.replace(/\/+$/,'');
 
     // Populate UI
     document.getElementById('cfg-url').value = cfg.url;
@@ -1216,11 +1342,15 @@ function loadConfig() {
     document.getElementById('soundEnabled').checked = cfg.soundEnabled;
     document.getElementById('systemPrompt').value = cfg.systemPrompt || '';
     document.getElementById('toolsConfig').value = cfg.tools || '';
+    const draft = localStorage.getItem('perplex_draft_v3');
+    if (draft) {
+        document.getElementById('prompt').value = draft;
+    }
 }
 
 function saveConfig() {
     // Gather UI Values
-    cfg.url = document.getElementById('cfg-url').value.trim();
+    cfg.url = document.getElementById('cfg-url').value.trim().replace(/\/+$/,'');
     cfg.key = document.getElementById('cfg-key').value.trim();
     cfg.useStreaming = document.getElementById('streaming').checked;
     cfg.temperature = parseFloat(document.getElementById('temperature').value);
@@ -1248,9 +1378,19 @@ async function checkConnection() {
         txt.innerText = 'NO KEY';
         return;
     }
-    // Simple check (if key exists we assume ready for now as pinging API might cost $)
-    ind.classList.add('connected');
-    txt.innerText = 'ONLINE';
+    try {
+        const res = await fetch(`${cfg.url}/health`);
+        if(res.ok) {
+            ind.classList.add('connected');
+            txt.innerText = 'ONLINE';
+        } else {
+            ind.classList.remove('connected');
+            txt.innerText = 'OFFLINE';
+        }
+    } catch(e) {
+        ind.classList.remove('connected');
+        txt.innerText = 'OFFLINE';
+    }
 }
 
 // --- CHAT LOGIC ---
@@ -1281,14 +1421,37 @@ function setupEventListeners() {
         const p = document.getElementById('advancedOptions');
         p.style.display = p.style.display === 'block' ? 'none' : 'block';
     });
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.body.classList.toggle('theme-alt');
+        showToast('THEME SHIFTED');
+    });
     
     // Quick Actions
     document.getElementById('newChatBtn').addEventListener('click', clearConversation);
+    document.getElementById('voiceBtn').addEventListener('click', toggleVoiceInput);
+    document.getElementById('saveTempBtn').addEventListener('click', saveTempDraft);
     document.getElementById('favBtn').addEventListener('click', addToFavorites);
     document.getElementById('copyBtn').addEventListener('click', copyLastResponse);
     document.getElementById('exportBtn').addEventListener('click', exportConversation);
     document.getElementById('clearHistoryBtn').addEventListener('click', clearAllHistory);
     document.getElementById('exportAllBtn').addEventListener('click', exportAllHistory);
+    document.getElementById('streaming').addEventListener('change', (e) => {
+        cfg.useStreaming = e.target.checked;
+    });
+    document.getElementById('markdownRender').addEventListener('change', (e) => {
+        cfg.markdownRender = e.target.checked;
+        renderConversation();
+    });
+    document.getElementById('autoSave').addEventListener('change', (e) => {
+        cfg.autoSave = e.target.checked;
+    });
+    document.getElementById('showTimestamps').addEventListener('change', (e) => {
+        cfg.showTimestamps = e.target.checked;
+        renderConversation();
+    });
+    document.getElementById('soundEnabled').addEventListener('change', (e) => {
+        cfg.soundEnabled = e.target.checked;
+    });
 
     // Keyboard
     document.getElementById('prompt').addEventListener('keydown', (e) => {
@@ -1312,7 +1475,17 @@ function setLoading(isLoading) {
 
 // --- SENDING MESSAGES ---
 
+function syncRuntimeConfig() {
+    cfg.useStreaming = document.getElementById('streaming').checked;
+    cfg.temperature = parseFloat(document.getElementById('temperature').value);
+    cfg.maxTokens = parseInt(document.getElementById('maxTokens').value);
+    cfg.frequencyPenalty = parseFloat(document.getElementById('frequencyPenalty').value);
+    cfg.systemPrompt = document.getElementById('systemPrompt').value;
+    cfg.tools = document.getElementById('toolsConfig').value;
+}
+
 async function send() {
+    syncRuntimeConfig();
     const promptInput = document.getElementById('prompt');
     const prompt = promptInput.value.trim();
     if(!prompt) return showToast("INPUT EMPTY", "error");
@@ -1374,16 +1547,19 @@ async function sendRest(prompt, startTime) {
         }
     } catch(e) { console.error("Tools JSON Error", e); }
 
-    const res = await fetch(cfg.url + '/chat/completions', {
+    const res = await fetch(cfg.url + '/v1/chat/completions', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${cfg.key}`
+            'X-API-KEY': cfg.key
         },
         body: JSON.stringify(payload)
     });
 
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    if(!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText}`);
+    }
     
     const data = await res.json();
     const content = data.choices[0].message.content;
@@ -1397,11 +1573,8 @@ async function sendRest(prompt, startTime) {
     setLoading(false);
 }
 
-// WEBSOCKET / STREAMING (Emulated via fetch stream for Perplexity compatibility)
+// WEBSOCKET / STREAMING (Bridge WebSocket)
 async function sendWebSocket(prompt, startTime) {
-    // Note: Perplexity uses standard SSE (Server Sent Events) over POST, not raw WebSockets usually.
-    // The original code used a custom Websocket logic. We will implement SSE logic here as it's more standard for this API.
-    
     const model = document.getElementById('modelSelector').value;
     const apiMessages = [
         ...(cfg.systemPrompt ? [{ role: 'system', content: cfg.systemPrompt }] : []),
@@ -1413,10 +1586,10 @@ async function sendWebSocket(prompt, startTime) {
         messages: apiMessages,
         temperature: cfg.temperature,
         max_tokens: cfg.maxTokens,
+        frequency_penalty: cfg.frequencyPenalty,
         stream: true
     };
 
-    // Include tools configuration if provided
     try {
         if(cfg.tools) {
             const t = JSON.parse(cfg.tools);
@@ -1424,46 +1597,59 @@ async function sendWebSocket(prompt, startTime) {
         }
     } catch(e) { console.error("Tools JSON Error", e); }
 
-    // Placeholder for stream message
     const assistantMsgIndex = currentConversation.push({ role: 'assistant', content: '', timestamp: new Date().toISOString() }) - 1;
-    renderConversation(); // Show empty bubble
+    renderConversation();
 
-    const response = await fetch(cfg.url + '/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${cfg.key}` },
-        body: JSON.stringify(payload)
-    });
+    return new Promise((resolve, reject) => {
+        const wsUrl = cfg.url.replace(/^http/, 'ws') + `/ws/chat?api_key=${encodeURIComponent(cfg.key)}`;
+        const ws = new WebSocket(wsUrl);
+        let buffer = '';
+        let fullContent = '';
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let fullContent = "";
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-        
-        for (const line of lines) {
-            if (line.startsWith("data: ") && line !== "data: [DONE]") {
-                try {
-                    const json = JSON.parse(line.substring(6));
-                    if (json.choices && json.choices[0].delta.content) {
-                        const txt = json.choices[0].delta.content;
-                        fullContent += txt;
-                        currentConversation[assistantMsgIndex].content = fullContent;
-                        // Re-render only last message ideally, but full render is safer for now
-                        renderConversation();
+        ws.onopen = () => ws.send(JSON.stringify(payload));
+        ws.onerror = () => reject(new Error('WebSocket error'));
+        ws.onmessage = (event) => {
+            const data = typeof event.data === 'string' ? event.data : '';
+            buffer += data;
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            lines.forEach(line => {
+                line = line.replace(/\r/g, '');
+                if (line.startsWith('data: ')) {
+                    const chunk = line.slice(6);
+                    if (chunk === '[DONE]') {
+                        ws.close();
+                        return;
                     }
-                } catch (e) { /* ignore parse errors in stream */ }
-            }
-        }
-    }
-    
-    updateStats((Date.now() - startTime)/1000, fullContent.length/4);
-    if(cfg.soundEnabled) playSound();
-    setLoading(false);
-    if(cfg.autoSave) saveCurrentConversation();
+                    try {
+                        const json = JSON.parse(chunk);
+                        if (json.choices && json.choices[0] && json.choices[0].delta && json.choices[0].delta.content) {
+                            const txt = json.choices[0].delta.content;
+                            fullContent += txt;
+                            currentConversation[assistantMsgIndex].content = fullContent;
+                            renderConversation();
+                        } else if (json.error) {
+                            throw new Error(json.error);
+                        }
+                    } catch (e) {}
+                } else if (line.trim().startsWith('{')) {
+                    try {
+                        const msg = JSON.parse(line);
+                        if (msg.error) {
+                            addMessageToConversation('assistant', `SYSTEM ERROR: ${msg.error}`);
+                        }
+                    } catch(e) {}
+                }
+            });
+        };
+        ws.onclose = () => {
+            updateStats((Date.now() - startTime)/1000, fullContent.length/4);
+            if(cfg.soundEnabled) playSound();
+            setLoading(false);
+            if(cfg.autoSave) saveCurrentConversation();
+            resolve();
+        };
+    });
 }
 
 // --- UI RENDERING ---
@@ -1642,27 +1828,29 @@ async function loadModels() {
     // Simulate or Fetch
     // If URL is valid, try fetch
     try {
-        const res = await fetch(cfg.url + '/models', { headers: { 'Authorization': `Bearer ${cfg.key}` } });
+        const res = await fetch(cfg.url + '/models', { headers: { 'X-API-KEY': cfg.key } });
         if(res.ok) {
             const data = await res.json();
-            // render
-            list.innerHTML = '';
-            select.innerHTML = '';
-            data.data.forEach(m => {
-                // Add to Grid
-                const card = document.createElement('div');
-                card.className = 'model-card';
-                card.innerHTML = `<h4 style="color:var(--neon-pink)">${m.id}</h4><small>Owned by ${m.owned_by}</small>`;
-                card.onclick = () => { select.value = m.id; switchTab('chat'); showToast(`ENTITY ${m.id} SELECTED`); };
-                list.appendChild(card);
-                
-                // Add to Select
-                const opt = document.createElement('option');
-                opt.value = m.id;
-                opt.innerText = m.id;
-                select.appendChild(opt);
-            });
-            return;
+            const models = data.data || data.models || [];
+            if(models.length > 0) {
+                list.innerHTML = '';
+                select.innerHTML = '';
+                models.forEach(m => {
+                    const modelId = m.id || m.name;
+                    const owner = m.owned_by || 'perplexity';
+                    const card = document.createElement('div');
+                    card.className = 'model-card';
+                    card.innerHTML = `<h4 style="color:var(--neon-pink)">${modelId}</h4><small>Owned by ${owner}</small>`;
+                    card.onclick = () => { select.value = modelId; switchTab('chat'); showToast(`ENTITY ${modelId} SELECTED`); };
+                    list.appendChild(card);
+                    
+                    const opt = document.createElement('option');
+                    opt.value = modelId;
+                    opt.innerText = modelId;
+                    select.appendChild(opt);
+                });
+                return;
+            }
         }
     } catch(e) {}
     
@@ -1671,6 +1859,48 @@ async function loadModels() {
 }
 
 // --- EXTRAS ---
+
+let speechRecognizer = null;
+let isListening = false;
+
+function saveTempDraft() {
+    const prompt = document.getElementById('prompt').value;
+    localStorage.setItem('perplex_draft_v3', prompt);
+    showToast('DRAFT SAVED');
+}
+
+function toggleVoiceInput() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+        showToast('VOICE INPUT NOT SUPPORTED', 'error');
+        return;
+    }
+    if (!speechRecognizer) {
+        speechRecognizer = new SpeechRec();
+        speechRecognizer.continuous = false;
+        speechRecognizer.interimResults = false;
+        speechRecognizer.lang = 'en-US';
+        speechRecognizer.onresult = (event) => {
+            const text = event.results[0][0].transcript;
+            document.getElementById('prompt').value = text;
+            showToast('VOICE CAPTURED');
+        };
+        speechRecognizer.onerror = () => {
+            showToast('VOICE ERROR', 'error');
+        };
+        speechRecognizer.onend = () => {
+            isListening = false;
+            document.getElementById('voiceBtn').innerText = '🎤 VOX';
+        };
+    }
+    if (!isListening) {
+        isListening = true;
+        document.getElementById('voiceBtn').innerText = '🎤 ...';
+        speechRecognizer.start();
+    } else {
+        speechRecognizer.stop();
+    }
+}
 
 function addToFavorites() {
     const lastUser = [...currentConversation].reverse().find(m => m.role === 'user');
