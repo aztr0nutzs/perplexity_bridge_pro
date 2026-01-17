@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Perplexity Bridge</string>
+    <string name="webview_content_description">Perplexity Bridge Web App</string>
+</resources>
