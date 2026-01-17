@@ -1,0 +1,9 @@
+
+body{background:#060913;color:#e6ecff;font-family:Arial}
+.app{max-width:1100px;margin:auto;padding:20px}
+header{font-size:30px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:#0d1430;padding:15px;border-radius:14px}
+textarea{width:100%;height:200px;background:#02040f;color:#fff;border:1px solid #394bff;border-radius:10px;padding:10px}
+button{margin-top:10px;background:#394bff;color:white;border:none;padding:10px 20px;border-radius:12px}
+pre{white-space:pre-wrap}
