@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, validator
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Any
 import asyncio
 import httpx
 import json
@@ -16,8 +16,12 @@ from pathlib import Path
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from config import PERPLEXITY_KEY, BASE_URL, BRIDGE_SECRET, RATE_LIMIT
+from config import (
+    PERPLEXITY_KEY, BASE_URL, BRIDGE_SECRET, RATE_LIMIT,
+    GITHUB_COPILOT_KEY, GITHUB_COPILOT_BASE_URL, has_github_copilot
+)
 from rate_limit import limiter
+from adapters.copilot_adapter import CopilotAdapter
 
 # Configure logging
 logging.basicConfig(
@@ -165,6 +169,134 @@ def get_perplexity_key() -> str:
     return PERPLEXITY_KEY.strip()
 
 
+def get_model_provider(model_id: str) -> str:
+    """
+    Determine which API provider to use based on model ID.
+    
+    Returns:
+        'perplexity' or 'github-copilot'
+    """
+    if model_id.startswith("copilot-"):
+        return "github-copilot"
+    return "perplexity"
+
+
+async def _perplexity_chat(req: ChatReq, request_data: dict) -> Any:
+    """Handle chat request via Perplexity API."""
+    key = get_perplexity_key()
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    
+    if req.stream:
+        async def stream_response():
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                async with client.stream(
+                    "POST",
+                    BASE_URL,
+                    json=request_data,
+                    headers=headers
+                ) as response:
+                    if response.status_code >= 400:
+                        error_text = await response.aread()
+                        error_payload = json.dumps({
+                            "error": f"Perplexity API error: {error_text.decode(errors='replace')}",
+                            "type": "error"
+                        })
+                        yield f"data: {error_payload}\n\n"
+                        return
+                    async for chunk in response.aiter_text():
+                        if chunk:
+                            yield chunk
+
+        return StreamingResponse(stream_response(), media_type="text/event-stream")
+    
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            BASE_URL,
+            json=request_data,
+            headers=headers
+        )
+        response.raise_for_status()
+        response_data = response.json()
+        
+        if not isinstance(response_data, dict):
+            raise ValueError("Response is not a valid JSON object")
+        
+        if "error" in response_data:
+            error_msg = response_data.get("error", {}).get("message", "Unknown API error")
+            logger.error(f"Perplexity API returned error: {error_msg}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Perplexity API error: {error_msg}"
+            )
+        
+        if "choices" not in response_data:
+            logger.error("Response missing 'choices' field")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Invalid response format: missing 'choices' field"
+            )
+        
+        if not isinstance(response_data["choices"], list) or len(response_data["choices"]) == 0:
+            logger.error("Response has no choices")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Invalid response format: no choices returned"
+            )
+        
+        choice = response_data["choices"][0]
+        if "message" not in choice:
+            logger.error("Choice missing 'message' field")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Invalid response format: choice missing 'message' field"
+            )
+        
+        logger.info("Successfully validated and returning response")
+        return response_data
+
+
+async def _copilot_chat(req: ChatReq, request_data: dict) -> Any:
+    """Handle chat request via GitHub Copilot API."""
+    if not has_github_copilot():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GitHub Copilot API is not configured. Please set GITHUB_COPILOT_API_KEY."
+        )
+    
+    try:
+        adapter = CopilotAdapter(api_key=GITHUB_COPILOT_KEY, base_url=GITHUB_COPILOT_BASE_URL)
+        
+        if req.stream:
+            # For streaming, we'd need to implement streaming in the adapter
+            # For now, return a note that streaming is not yet supported for Copilot
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Streaming is not yet implemented for GitHub Copilot. Please disable streaming."
+            )
+        
+        response_data = await adapter.chat_completion(
+            messages=[m.dict() for m in req.messages],
+            model=req.model,
+            stream=False,
+            max_tokens=req.max_tokens,
+            temperature=req.temperature
+        )
+        
+        logger.info("Successfully received response from GitHub Copilot")
+        return response_data
+        
+    except Exception as e:
+        logger.error(f"GitHub Copilot API error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"GitHub Copilot API error: {str(e)}"
+        )
+
+
 @app.middleware("http")
 async def auth(req: Request, call_next):
     """Authentication middleware for HTTP requests."""
@@ -205,29 +337,108 @@ async def health():
 @app.get("/models")
 async def get_models():
     """
-    Get list of available models.
-    This endpoint returns commonly used Perplexity models.
+    Get list of available models from both Perplexity and GitHub Copilot.
+    This endpoint returns all supported models including GPT, Gemini, Claude, and reasoning models.
     """
     models = [
+        # OpenAI GPT Models
         {
-            "id": "mistral-7b-instruct",
-            "name": "Mistral 7B Instruct",
-            "description": "7B parameter instruction-tuned model"
+            "id": "gpt-5.2",
+            "name": "GPT-5.2 (ChatGPT)",
+            "description": "Advanced reasoning, coding, creativity. Best for generative tasks and complex problem-solving",
+            "provider": "perplexity",
+            "category": "reasoning"
+        },
+        # Google Gemini Models
+        {
+            "id": "gemini-3-pro",
+            "name": "Gemini 3 Pro",
+            "description": "Multimodal AI with 1M token context. Ideal for large data sets and enterprise tasks",
+            "provider": "perplexity",
+            "category": "reasoning"
+        },
+        # Anthropic Claude Models
+        {
+            "id": "claude-4.5-sonnet",
+            "name": "Claude 4.5 Sonnet",
+            "description": "Technical reasoning, coding, agentic workflows. Strong for structured problem solving",
+            "provider": "perplexity",
+            "category": "reasoning"
+        },
+        {
+            "id": "claude-4.5-opus",
+            "name": "Claude 4.5 Opus",
+            "description": "Premium tier for most demanding logic and synthesis tasks",
+            "provider": "perplexity",
+            "category": "reasoning"
+        },
+        # xAI Grok
+        {
+            "id": "grok-4.1",
+            "name": "Grok 4.1",
+            "description": "Conversational intelligence, code, image/text understanding with reasoning toggle",
+            "provider": "perplexity",
+            "category": "reasoning"
+        },
+        # Kimi Thinking Model
+        {
+            "id": "kimi-k2-thinking",
+            "name": "Kimi K2 Thinking",
+            "description": "Privacy-centric logic-driven solutions with advanced explanations",
+            "provider": "perplexity",
+            "category": "reasoning"
+        },
+        # Perplexity Sonar Models
+        {
+            "id": "sonar-pro",
+            "name": "Sonar Pro (Llama 3.1 70B)",
+            "description": "Real-time search, rapid summarization, transparent source citation. Best for factual research",
+            "provider": "perplexity",
+            "category": "search"
         },
         {
             "id": "llama-3.1-sonar-small-128k-online",
             "name": "Llama 3.1 Sonar Small (128k)",
-            "description": "Small model with 128k context window and online capabilities"
+            "description": "Small model with 128k context window and online capabilities",
+            "provider": "perplexity",
+            "category": "chat"
         },
         {
             "id": "llama-3.1-sonar-large-128k-online",
             "name": "Llama 3.1 Sonar Large (128k)",
-            "description": "Large model with 128k context window and online capabilities"
+            "description": "Large model with 128k context window and online capabilities",
+            "provider": "perplexity",
+            "category": "chat"
         },
         {
             "id": "llama-3.1-sonar-huge-128k-online",
             "name": "Llama 3.1 Sonar Huge (128k)",
-            "description": "Huge model with 128k context window and online capabilities"
+            "description": "Huge model with 128k context window and online capabilities",
+            "provider": "perplexity",
+            "category": "chat"
+        },
+        # Legacy Mistral
+        {
+            "id": "mistral-7b-instruct",
+            "name": "Mistral 7B Instruct",
+            "description": "7B parameter instruction-tuned model",
+            "provider": "perplexity",
+            "category": "chat"
+        },
+        # GitHub Copilot Models
+        {
+            "id": "copilot-gpt-4",
+            "name": "GitHub Copilot GPT-4",
+            "description": "GitHub Copilot powered by GPT-4 for advanced code completion and generation",
+            "provider": "github-copilot",
+            "category": "coding"
+        },
+        {
+            "id": "copilot-agent",
+            "name": "GitHub Copilot Agent",
+            "description": "Multi-step task-oriented workflows for DevOps and development automation",
+            "provider": "github-copilot",
+            "category": "coding"
         }
     ]
     data = [
@@ -235,7 +446,8 @@ async def get_models():
             "id": m["id"],
             "name": m["name"],
             "description": m["description"],
-            "owned_by": "perplexity",
+            "provider": m["provider"],
+            "category": m["category"],
             "object": "model"
         }
         for m in models
@@ -249,7 +461,7 @@ async def chat(req: ChatReq, request: Request):
     """
     Chat completions endpoint.
     
-    Proxies requests to Perplexity AI API with rate limiting and validation.
+    Proxies requests to Perplexity AI API or GitHub Copilot API based on model selection.
     
     **Authentication Required**: Include `X-API-KEY` header
     
@@ -262,15 +474,19 @@ async def chat(req: ChatReq, request: Request):
     - Message content cannot be empty
     - max_tokens: 1-4096, temperature: 0.0-2.0, frequency_penalty: -2.0-2.0
     
+    **Supported Providers**:
+    - Perplexity: GPT-5.2, Gemini 3 Pro, Claude 4.5, Sonar models, etc.
+    - GitHub Copilot: copilot-gpt-4, copilot-agent
+    
     **Response**:
     - Validates response structure before returning
     - Returns error if API response is malformed
-    - Returns HTTP 502 if Perplexity API returns an error
+    - Returns HTTP 502 if upstream API returns an error
     
     **Example Request**:
     ```json
     {
-      "model": "mistral-7b-instruct",
+      "model": "gpt-5.2",
       "messages": [
         {"role": "user", "content": "What is Python?"}
       ],
@@ -280,105 +496,32 @@ async def chat(req: ChatReq, request: Request):
     ```
     """
     try:
-        key = get_perplexity_key()
-        headers = {
-            "Authorization": f"Bearer {key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-        
         request_data = req.dict()
-        logger.info(f"Processing chat request with model: {req.model}")
-
-        if req.stream:
-            async def stream_response():
-                async with httpx.AsyncClient(timeout=120.0) as client:
-                    async with client.stream(
-                        "POST",
-                        BASE_URL,
-                        json=request_data,
-                        headers=headers
-                    ) as response:
-                        if response.status_code >= 400:
-                            error_text = await response.aread()
-                            error_payload = json.dumps({
-                                "error": f"Perplexity API error: {error_text.decode(errors='replace')}",
-                                "type": "error"
-                            })
-                            yield f"data: {error_payload}\n\n"
-                            return
-                        async for chunk in response.aiter_text():
-                            if chunk:
-                                yield chunk
-
-            return StreamingResponse(stream_response(), media_type="text/event-stream")
+        provider = get_model_provider(req.model)
+        logger.info(f"Processing chat request with model: {req.model} (provider: {provider})")
         
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                BASE_URL,
-                json=request_data,
-                headers=headers
-            )
-            response.raise_for_status()
-            
-            # Validate response structure
-            response_data = response.json()
-            
-            if not isinstance(response_data, dict):
-                raise ValueError("Response is not a valid JSON object")
-            
-            if "error" in response_data:
-                error_msg = response_data.get("error", {}).get("message", "Unknown API error")
-                logger.error(f"Perplexity API returned error: {error_msg}")
-                raise HTTPException(
-                    status_code=status.HTTP_502_BAD_GATEWAY,
-                    detail=f"Perplexity API error: {error_msg}"
-                )
-            
-            # Validate that we have choices
-            if "choices" not in response_data:
-                logger.error("Response missing 'choices' field")
-                raise HTTPException(
-                    status_code=status.HTTP_502_BAD_GATEWAY,
-                    detail="Invalid response format: missing 'choices' field"
-                )
-            
-            if not isinstance(response_data["choices"], list) or len(response_data["choices"]) == 0:
-                logger.error("Response has no choices")
-                raise HTTPException(
-                    status_code=status.HTTP_502_BAD_GATEWAY,
-                    detail="Invalid response format: no choices returned"
-                )
-            
-            # Validate choice structure
-            choice = response_data["choices"][0]
-            if "message" not in choice:
-                logger.error("Choice missing 'message' field")
-                raise HTTPException(
-                    status_code=status.HTTP_502_BAD_GATEWAY,
-                    detail="Invalid response format: choice missing 'message' field"
-                )
-            
-            logger.info("Successfully validated and returning response")
-            return response_data
+        if provider == "github-copilot":
+            return await _copilot_chat(req, request_data)
+        else:
+            return await _perplexity_chat(req, request_data)
             
     except httpx.HTTPStatusError as e:
-        logger.error(f"Perplexity API error: {e.response.status_code} - {e.response.text}")
+        logger.error(f"API error: {e.response.status_code} - {e.response.text}")
         raise HTTPException(
             status_code=e.response.status_code,
-            detail=f"Perplexity API error: {e.response.text}"
+            detail=f"API error: {e.response.text}"
         )
     except httpx.TimeoutException:
-        logger.error("Request to Perplexity API timed out")
+        logger.error("Request to API timed out")
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="Request to Perplexity API timed out"
+            detail="Request to API timed out"
         )
     except httpx.RequestError as e:
         logger.error(f"Request error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Failed to connect to Perplexity API: {str(e)}"
+            detail=f"Failed to connect to API: {str(e)}"
         )
     except Exception as e:
         logger.error(f"Unexpected error in chat endpoint: {str(e)}", exc_info=True)
