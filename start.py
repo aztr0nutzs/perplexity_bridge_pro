@@ -107,7 +107,7 @@ def start_server():
         logger.info("=" * 60)
         logger.info(f"Server URL: {url}")
         logger.info(f"UI URL: {url}/")
-        logger.info(f"API Key: {BRIDGE_SECRET}")
+        logger.info(f"API Key: {'*' * (len(BRIDGE_SECRET) - 4) + BRIDGE_SECRET[-4:] if len(BRIDGE_SECRET) > 4 else '****'}")
         logger.info("=" * 60)
         logger.info("\nPress Ctrl+C to stop the server\n")
         
