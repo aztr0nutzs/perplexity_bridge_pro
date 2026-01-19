@@ -4,43 +4,68 @@
 
 ## Introduction
 
-**Perplexity Bridge Pro** is a powerful, open-source FastAPI-based proxy bridge that connects seamlessly to the Perplexity AI API. This project provides a robust intermediary layer with advanced features like rate limiting, real-time WebSocket streaming, a modern web-based dashboard, and integrated development tools including a VSCode extension and Python adapters.
+**Perplexity Bridge Pro** is a powerful, open-source FastAPI-based proxy bridge that provides unified access to multiple state-of-the-art AI models including Perplexity AI (GPT-5.2, Gemini 3 Pro, Claude 4.5) and GitHub Copilot. This project provides a robust intermediary layer with advanced features like intelligent model routing, rate limiting, real-time WebSocket streaming, a modern web-based dashboard, and integrated development tools.
 
 ### Purpose and Overview
 
-The primary purpose of Perplexity Bridge Pro is to simplify and enhance the integration of Perplexity AI's powerful language models into various applications and workflows. By acting as a bridge, it offers:
+The primary purpose of Perplexity Bridge Pro is to simplify and enhance the integration of the world's best AI models into various applications and workflows through a single, unified interface. By acting as a bridge, it offers:
 
-- **Unified API Access**: Standardized endpoints for chat completions and model management
+- **Unified Multi-Model Access**: Access GPT-5.2, Gemini 3 Pro, Claude 4.5, Sonar models, and GitHub Copilot through one API
+- **Intelligent Model Routing**: Automatically selects the best model for each task based on characteristics
 - **Enhanced Security**: API key management and rate limiting to prevent abuse
 - **Developer-Friendly Tools**: Web UI for testing, VSCode extension for quick queries, and Python adapters for easy integration
 - **Real-Time Capabilities**: WebSocket streaming for live, interactive conversations
-- **Cross-Platform Support**: Works on Windows, macOS, Linux, and web browsers
+- **Cross-Platform Support**: Works on Windows, macOS, Linux, Android, and web browsers
 
-Whether you're a developer building AI-powered applications, a researcher exploring language models, or an enthusiast experimenting with AI, Perplexity Bridge Pro provides the tools and infrastructure to make integration smooth and efficient.
+Whether you're a developer building AI-powered applications, a researcher exploring language models, or an enthusiast experimenting with AI, Perplexity Bridge Pro provides the tools and infrastructure to leverage the best models for each task.
 
 ## Features and Capabilities
 
 ### Core Features
 
+- **Multi-Provider API Access**: Seamlessly switch between Perplexity AI and GitHub Copilot APIs
+- **15+ AI Models**: Access to GPT-5.2, Gemini 3 Pro, Claude 4.5, Sonar, Grok, Kimi, and more
+- **Intelligent Routing**: Automatic model selection based on task characteristics
 - **REST API**: Standard HTTP POST endpoint for chat completions with full OpenAI-compatible formatting
 - **WebSocket Streaming**: Real-time, bidirectional streaming for interactive conversations
 - **Rate Limiting**: Configurable per-IP rate limiting (default: 10 requests/minute) to manage API usage
 - **Authentication**: Secure API key-based authentication system
 - **Health Monitoring**: Built-in health check endpoints for system monitoring and uptime tracking
 
+### Multi-Model Support
+
+Access to cutting-edge AI models organized by category:
+
+**Reasoning Models:**
+- **GPT-5.2 (ChatGPT)**: Complex reasoning, creativity, general problem-solving
+- **Gemini 3 Pro**: 1M token context, multimodal analysis (text/images/video)
+- **Claude 4.5 Sonnet/Opus**: Technical reasoning, coding, structured workflows
+- **Grok 4.1**: Conversational intelligence with reasoning toggle
+- **Kimi K2 Thinking**: Privacy-centric logic-driven solutions
+
+**Search & Research:**
+- **Sonar Pro**: Real-time search with source citations
+- **Llama 3.1 Sonar Models**: 128k context, online capabilities
+
+**Coding & Development:**
+- **GitHub Copilot GPT-4**: Code completion and generation
+- **Copilot Agent**: Multi-step DevOps workflows and automation
+
 ### Advanced Options
 
-- **Multiple Model Support**: Access to various Perplexity models including Mistral, Llama 3.1 variants
+- **Model Categories**: Reasoning, Coding, Search - organized for easy selection
 - **Advanced Parameters**: Fine-tune responses with temperature, max tokens, frequency penalty controls
 - **System Prompts**: Customizable system prompts for specialized use cases
+- **Tool Calling**: Function calling support for enhanced capabilities
 - **Conversation History**: Persistent chat history with export capabilities
 - **Favorites System**: Save and manage favorite conversations and prompts
 
 ### Integrations
 
-- **Web UI Dashboard**: Modern, responsive web interface for testing and managing interactions
-- **VSCode Extension**: Integrated extension for querying Perplexity directly from VSCode
-- **Python Roo Adapter**: Easy-to-use Python library for seamless integration into Python projects
+- **Web UI Dashboard**: Modern, responsive web interface with model categories and provider indicators
+- **Android App**: Native Android application with WebView integration
+- **VSCode Extension**: Integrated extension for querying AI directly from VSCode
+- **Python Adapters**: Easy-to-use Python libraries (Roo, Copilot) for seamless integration
 - **Cross-Origin Support**: CORS-enabled for web application integrations
 
 ### Additional Capabilities
@@ -59,6 +84,7 @@ Before installing Perplexity Bridge Pro, ensure you have:
 
 - **Python 3.8 or higher** installed on your system
 - **Perplexity AI API Key**: Obtain one from [Perplexity AI Settings](https://www.perplexity.ai/settings/api)
+- **GitHub Copilot Token** (optional): For Copilot integration, get a GitHub Personal Access Token with Copilot access
 - **Node.js 14+** (optional, required only for VSCode extension development)
 
 ### Quick Start Installation
@@ -137,6 +163,7 @@ For advanced users or custom deployments:
    cp env.example .env
    # Edit .env with your settings:
    # PERPLEXITY_API_KEY=your_api_key_here
+   # GITHUB_COPILOT_API_KEY=your_github_token_here (optional)
    # BRIDGE_SECRET=your_secure_secret_here
    ```
 
@@ -153,22 +180,46 @@ Docker support is planned for future releases to enable containerized deployment
 
 ### Getting Started
 
-After installation, access the web UI at `http://localhost:7860`. The interface provides an intuitive dashboard for interacting with Perplexity AI models.
+After installation, access the web UI at `http://localhost:7860`. The interface provides an intuitive dashboard for interacting with multiple AI models from Perplexity and GitHub Copilot.
+
+#### Choosing the Right Model
+
+The bridge provides access to 15+ AI models organized by category:
+
+- **For Creative Tasks & Reasoning**: Use GPT-5.2 (ChatGPT)
+- **For Coding & Development**: Use Copilot GPT-4 or Claude 4.5 Sonnet
+- **For Research & Facts**: Use Sonar Pro (includes source citations)
+- **For Large Data Analysis**: Use Gemini 3 Pro (1M token context)
+- **For DevOps Automation**: Use Copilot Agent
+
+💡 **Tip**: The bridge includes intelligent routing - the `agent/router.py` can automatically select the best model based on your task description!
 
 #### Basic Chat Interface
 
-1. **Select a Model**: Choose from available models in the dropdown (e.g., Mistral 7B, Llama 3.1 variants)
-2. **Enter Your Prompt**: Type your question or prompt in the text area
-3. **Configure Options**: Adjust temperature, max tokens, and other parameters as needed
-4. **Send Message**: Click send or press Ctrl+Enter
-5. **View Response**: Responses appear in real-time with streaming support
+1. **Select a Model**: Choose from 15+ models in the dropdown, grouped by provider (Perplexity/GitHub Copilot)
+2. **View Model Info**: Visit the MODELS tab to see detailed descriptions and categories
+3. **Enter Your Prompt**: Type your question or prompt in the text area
+4. **Configure Options**: Adjust temperature, max tokens, and other parameters as needed
+5. **Send Message**: Click send or press Ctrl+Enter
+6. **View Response**: Responses appear in real-time with streaming support (Perplexity models)
 
 #### Advanced Features
 
+- **Model Categories**: Filter models by Reasoning, Coding, or Search capabilities
 - **Streaming Toggle**: Enable/disable real-time streaming for instant responses
 - **System Prompts**: Add custom system prompts for specialized conversations
+- **Tool Configuration**: Add function calling tools for enhanced capabilities
 - **Conversation History**: Access previous conversations and continue threads
 - **Export Options**: Save conversations as text files or JSON
+
+### Multi-Model Integration
+
+See [MULTI_MODEL_GUIDE.md](MULTI_MODEL_GUIDE.md) for comprehensive documentation on:
+- Detailed model capabilities and selection guide
+- GitHub Copilot setup and usage
+- Intelligent routing configuration
+- Python integration examples
+- Performance optimization tips
 
 ### Screenshots
 
@@ -176,11 +227,36 @@ After installation, access the web UI at `http://localhost:7860`. The interface 
 
 ### Examples
 
-#### Basic Chat Completion
+#### Code Generation with GitHub Copilot
 
 ```bash
 curl -X POST http://localhost:7860/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "X-API-KEY: your_bridge_secret" \
+  -d '{
+    "model": "copilot-gpt-4",
+    "messages": [
+      {"role": "user", "content": "Write a Python function to calculate fibonacci sequence"}
+    ],
+    "max_tokens": 500,
+    "temperature": 0.2
+  }'
+```
+
+#### Research with Source Citations
+
+```bash
+curl -X POST http://localhost:7860/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: your_bridge_secret" \
+  -d '{
+    "model": "sonar-pro",
+    "messages": [
+      {"role": "user", "content": "What are the latest developments in quantum computing?"}
+    ],
+    "max_tokens": 1000
+  }'
+```
   -H "X-API-KEY: your_bridge_secret" \
   -d '{
     "model": "mistral-7b-instruct",
