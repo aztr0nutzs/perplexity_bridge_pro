@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Node (for VSCode extension)
+vscode_extension/node_modules/
+node_modules/
+
+# Android
+android_app/.gradle/
+android_app/build/
+android_app/local.properties
+android_app/.idea/
+android_app/*.iml
+android_app/captures/
+android_app/.externalNativeBuild/
+android_app/.cxx/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Project specific
+*.vsix
