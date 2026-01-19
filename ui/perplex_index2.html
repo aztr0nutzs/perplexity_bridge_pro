@@ -481,9 +481,13 @@
                                     <label><input type="checkbox" id="streaming"> <div class="slider"></div> STREAM</label>
                                 </div>
                                 <select id="modelSelector">
+                                    <option value="gpt-5.2">GPT-5.2 (ChatGPT)</option>
+                                    <option value="claude-4.5-sonnet">Claude 4.5 Sonnet</option>
+                                    <option value="gemini-3-pro">Gemini 3 Pro</option>
+                                    <option value="sonar-pro">Sonar Pro</option>
+                                    <option value="copilot-gpt-4">GitHub Copilot GPT-4</option>
                                     <option value="llama-3.1-sonar-small-128k-online">Sonar Small Online</option>
                                     <option value="llama-3.1-sonar-large-128k-online">Sonar Large Online</option>
-                                    <option value="llama-3.1-70b-instruct">Llama 3.1 70B</option>
                                 </select>
                                 <button class="cyber-btn" id="advancedToggle">⚡ ADVANCED</button>
                                 <button class="cyber-btn send" id="sendBtn">TRANSMIT ➤</button>
@@ -1881,19 +1885,51 @@ async function loadModels() {
             if(models.length > 0) {
                 list.innerHTML = '';
                 select.innerHTML = '';
+                
+                // Group models by provider
+                const grouped = {};
                 models.forEach(m => {
-                    const modelId = m.id || m.name;
-                    const owner = m.owned_by || 'perplexity';
-                    const card = document.createElement('div');
-                    card.className = 'model-card';
-                    card.innerHTML = `<h4 style="color:var(--neon-pink)">${modelId}</h4><small>Owned by ${owner}</small>`;
-                    card.onclick = () => { select.value = modelId; switchTab('chat'); showToast(`ENTITY ${modelId} SELECTED`); };
-                    list.appendChild(card);
+                    const provider = m.provider || 'perplexity';
+                    if (!grouped[provider]) grouped[provider] = [];
+                    grouped[provider].push(m);
+                });
+                
+                // Render by provider
+                Object.keys(grouped).sort().forEach(provider => {
+                    const providerLabel = document.createElement('div');
+                    providerLabel.style = 'color: var(--neon-purple); font-size: 0.9rem; margin: 15px 0 8px 0; font-weight: bold; text-transform: uppercase;';
+                    providerLabel.innerHTML = `◆ ${provider}`;
+                    list.appendChild(providerLabel);
                     
-                    const opt = document.createElement('option');
-                    opt.value = modelId;
-                    opt.innerText = modelId;
-                    select.appendChild(opt);
+                    grouped[provider].forEach(m => {
+                        const modelId = m.id || m.name;
+                        const category = m.category || 'general';
+                        const desc = m.description || '';
+                        
+                        const card = document.createElement('div');
+                        card.className = 'model-card';
+                        
+                        // Category badge color
+                        let badgeColor = 'var(--neon-cyan)';
+                        if (category === 'reasoning') badgeColor = 'var(--neon-pink)';
+                        else if (category === 'coding') badgeColor = 'var(--neon-green)';
+                        else if (category === 'search') badgeColor = 'var(--neon-purple)';
+                        
+                        card.innerHTML = `
+                            <h4 style="color:var(--neon-pink); display: flex; justify-content: space-between; align-items: center;">
+                                ${m.name || modelId}
+                                <span style="font-size: 0.65rem; color: ${badgeColor}; border: 1px solid ${badgeColor}; padding: 2px 6px; border-radius: 3px;">${category.toUpperCase()}</span>
+                            </h4>
+                            <small style="display: block; margin-top: 4px; color: #888;">${desc}</small>
+                        `;
+                        card.onclick = () => { select.value = modelId; switchTab('chat'); showToast(`ENTITY ${modelId} SELECTED`); };
+                        list.appendChild(card);
+                        
+                        const opt = document.createElement('option');
+                        opt.value = modelId;
+                        opt.innerText = `${m.name || modelId} [${provider}]`;
+                        select.appendChild(opt);
+                    });
                 });
                 return;
             }
