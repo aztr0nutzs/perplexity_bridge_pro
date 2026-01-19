@@ -644,10 +644,8 @@ Retrieve all available models including GPT, Claude, Gemini, Grok, Kimi, and Son
       "id": "sonar-70b",
       "name": "Sonar 70B",
       "description": "Perplexity's flagship model optimized for real-time search with citations"
-    }
-      "name": "Llama 3.1 Sonar Small (128k)",
-      "description": "Small model with 128k context window and online capabilities"
-    }
+    },
+    ... // Additional models available
   ]
 }
 ```
