@@ -11,29 +11,24 @@ The Android app in this directory is **NOT FUNCTIONAL** in its current state.
    - Actual location: `assets/perplexity_api_project_files/ui/perplex_index2.html`
    - **Fix Required:** Restructure assets OR update paths
 
-2. **BioGameBridge Non-Functional** 🔴 CRITICAL
-   - All JavaScript bridge methods are stubs
-   - Methods: playKNXT4(), openStore(), loadLobby(), closeGame()
-   - **Fix Required:** Implement actual functionality or remove
-
-3. **Example Package Name** 🔴 CRITICAL
+2. **Example Package Name** 🔴 CRITICAL
    - Current: `com.example.perplexitybridge`
    - **Fix Required:** Change to production package name
 
-4. **Massive APK Size** 🔴 CRITICAL
+3. **Massive APK Size** 🔴 CRITICAL
    - Assets include full node_modules (~800 files)
    - Expected APK size: >50MB
    - **Fix Required:** Remove node_modules, only include runtime files
 
-5. **No Version Info** 🟡 MEDIUM
+4. **No Version Info** 🟡 MEDIUM
    - No versionCode or versionName in build.gradle
    - **Fix Required:** Add version information
 
-6. **Activity Exported True** 🟡 MEDIUM
+5. **Activity Exported True** 🟡 MEDIUM
    - Security concern: Other apps can launch activity
    - **Fix Required:** Set to false or document why true
 
-7. **No Proguard/R8** 🟡 MEDIUM
+6. **No Proguard/R8** 🟡 MEDIUM
    - No code shrinking or obfuscation
    - **Fix Required:** Enable R8 with proper rules
 
@@ -112,7 +107,6 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 - [ ] App installs without errors
 - [ ] WebView loads content
 - [ ] No 404 errors in logcat
-- [ ] JavaScript bridge works (if implemented)
 - [ ] Swipe-to-refresh works
 - [ ] Back button navigation works
 - [ ] APK size is reasonable (<20MB)

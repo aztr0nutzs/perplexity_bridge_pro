@@ -993,8 +993,7 @@ android_app/
 │   │   │   ├── AndroidManifest.xml      # App manifest
 │   │   │   ├── java/com/example/perplexitybridge/
 │   │   │   │   ├── MainActivity.java     # Main activity
-│   │   │   │   ├── WebAppConfig.java    # Security config
-│   │   │   │   └── BioGameBridge.java   # JS bridge
+│   │   │   │   └── WebAppConfig.java    # Security config
 │   │   │   └── assets/
 │   │   │       └── perplexity_api_project_files/  # Embedded web app
 │   │   ├── test/                        # Unit tests
@@ -1011,7 +1010,6 @@ public class MainActivity extends AppCompatActivity {
     // ✅ Loads local assets via WebViewAssetLoader
     // ✅ Implements swipe-to-refresh
     // ✅ Handles back navigation
-    // ✅ JavaScript interface bridge
     
     // Security settings (Lines 50-57):
     // ✅ JavaScript enabled
@@ -1026,23 +1024,7 @@ public class MainActivity extends AppCompatActivity {
 }
 ```
 
-**2. BioGameBridge.java (51 lines):**
-```java
-@JavascriptInterface
-public class BioGameBridge {
-    // Methods exposed to JavaScript:
-    // playKNXT4() - Line 18: ❌ Just navigates to index.html
-    // openStore() - Line 26: ❌ Just navigates to index.html
-    // loadLobby() - Line 34: ❌ Just navigates to index.html
-    // closeGame() - Line 42: ❌ Does nothing
-    
-    // ⚠️ All methods are non-functional stubs
-    // ⚠️ Names suggest gaming app, not AI bridge
-    // ⚠️ No actual Android integration
-}
-```
-
-**3. WebAppConfig.java (19 lines):**
+**2. WebAppConfig.java (19 lines):**
 ```java
 public class WebAppConfig {
     public static final String BASE_URL = 
@@ -1113,13 +1095,7 @@ dependencies {
 - **Impact:** Can't publish to Play Store
 - **Fix Required:** Change to proper package name
 
-**ISSUE 9.2 - BioGameBridge Non-Functional** 🔴 CRITICAL
-- **Location:** `BioGameBridge.java`
-- **Problem:** All methods are stubs
-- **Impact:** JavaScript bridge doesn't do anything
-- **Fix Required:** Either implement functionality or remove class
-
-**ISSUE 9.3 - Wrong Asset Structure** 🔴 CRITICAL
+**ISSUE 9.2 - Wrong Asset Structure** 🔴 CRITICAL
 - **Location:** `WebAppConfig.java` expects `assets/www/index.html`
 - **Problem:** Web app is at `assets/perplexity_api_project_files/ui/perplex_index2.html`
 - **Impact:** App will fail to load web content
@@ -1127,43 +1103,43 @@ dependencies {
   - Option A: Move perplex_index2.html to assets/www/index.html
   - Option B: Update WebAppConfig paths
 
-**ISSUE 9.4 - Massive Asset Bundle** 🔴 CRITICAL
+**ISSUE 9.3 - Massive Asset Bundle** 🔴 CRITICAL
 - **Location:** `assets/perplexity_api_project_files/`
 - **Problem:** Includes node_modules (~800 files)
 - **Impact:** APK size >50MB, review rejection likely
 - **Fix Required:** Only include runtime files (HTML, JS, CSS, assets)
 
-**ISSUE 9.5 - No Version Info** 🟡 MEDIUM
+**ISSUE 9.4 - No Version Info** 🟡 MEDIUM
 - **Location:** `app/build.gradle`
 - **Problem:** No versionCode or versionName
 - **Impact:** Can't track app versions
 - **Fix Required:** Add version info
 
-**ISSUE 9.6 - Activity Exported True** 🟡 MEDIUM
+**ISSUE 9.5 - Activity Exported True** 🟡 MEDIUM
 - **Location:** `AndroidManifest.xml` line 12
 - **Problem:** `android:exported="true"` unnecessarily permissive
 - **Impact:** Other apps can launch this activity
 - **Fix Required:** Set to false or document why true
 
-**ISSUE 9.7 - No Proguard/R8** 🟡 MEDIUM
+**ISSUE 9.6 - No Proguard/R8** 🟡 MEDIUM
 - **Location:** `app/build.gradle`
 - **Problem:** No code shrinking/obfuscation
 - **Impact:** Large APK, easier to reverse engineer
 - **Fix Required:** Enable R8 and configure rules
 
-**ISSUE 9.8 - No Error Handling** 🟡 MEDIUM
+**ISSUE 9.7 - No Error Handling** 🟡 MEDIUM
 - **Location:** `MainActivity.java`
 - **Problem:** No try/catch for WebView initialization
 - **Impact:** App may crash on old devices
 - **Fix Required:** Add error handling
 
-**ISSUE 9.9 - No Offline Support** 🟢 LOW
+**ISSUE 9.8 - No Offline Support** 🟢 LOW
 - **Location:** `MainActivity.java`
 - **Problem:** No handling for missing network
 - **Impact:** Poor UX when offline
 - **Fix Required:** Add offline message or cached mode
 
-**ISSUE 9.10 - Tests Don't Test Anything** 🟢 LOW
+**ISSUE 9.9 - Tests Don't Test Anything** 🟢 LOW
 - **Location:** `WebAppConfigTest.java`, `MainActivityLaunchTest.java`
 - **Problem:** Empty placeholder tests
 - **Impact:** No test coverage
@@ -1206,7 +1182,6 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 4. **Android App Non-Functional**
    - Wrong asset path (expects www/index.html, has perplexity_api_project_files/...)
-   - BioGameBridge methods are stubs
    - Package name is "com.example"
    - Fix: Complete Android app implementation or mark as WIP
 

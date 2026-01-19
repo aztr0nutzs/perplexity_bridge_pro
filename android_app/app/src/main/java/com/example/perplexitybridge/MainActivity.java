@@ -75,8 +75,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        webView.addJavascriptInterface(new BioGameBridge(this), "BioGameJS");
-
         swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
 
         if (savedInstanceState == null) {
@@ -93,19 +91,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void loadLocalPage(String fileName) {
-        if (fileName == null || !WebAppConfig.isAllowedPage(fileName)) {
-            Log.w(TAG, "Blocked navigation to " + fileName);
-            return;
-        }
-        String url = WebAppConfig.BASE_URL + fileName;
-        webView.loadUrl(url);
-    }
-
     @Override
     protected void onDestroy() {
         if (webView != null) {
-            webView.removeJavascriptInterface("BioGameJS");
             webView.destroy();
         }
         super.onDestroy();
