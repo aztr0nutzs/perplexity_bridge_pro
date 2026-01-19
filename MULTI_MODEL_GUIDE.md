@@ -77,6 +77,16 @@ Perplexity Bridge Pro now supports multiple AI models from both Perplexity AI an
 
 **Note**: GitHub Copilot integration requires an active Copilot subscription.
 
+**Important**: The GitHub Copilot API integration is implemented using the standard OpenAI-compatible
+chat completions format. Depending on your GitHub Copilot access level, you may need to:
+- Use the GitHub Copilot SDK (see [GitHub's documentation](https://github.com/github/copilot-sdk))
+- Configure specific endpoints for your organization
+- Update the `GITHUB_COPILOT_BASE_URL` in your `.env` file
+
+The current implementation provides a compatible adapter that works with standard endpoints.
+For production use with GitHub Copilot, consult GitHub's official Copilot API documentation
+for the correct endpoints and authentication method for your subscription tier.
+
 ### Bridge Authentication
 
 Set your bridge secret for API authentication:

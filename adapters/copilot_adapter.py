@@ -3,6 +3,19 @@ GitHub Copilot API Adapter
 
 Provides integration with GitHub Copilot API for code generation,
 chat completions, and agentic workflows.
+
+**Important Notes:**
+- This adapter implements a standard OpenAI-compatible interface for GitHub Copilot
+- Actual endpoint availability depends on your GitHub Copilot subscription and access level
+- For production use, you may need to:
+  1. Use the official GitHub Copilot SDK (https://github.com/github/copilot-sdk)
+  2. Configure organization-specific endpoints
+  3. Use proper authentication methods for your tier
+- The default base URL assumes standard API access patterns
+- Consult GitHub's official Copilot documentation for your specific setup
+
+This implementation provides a flexible adapter that can be configured via
+environment variables to work with different GitHub Copilot deployments.
 """
 
 import httpx
@@ -50,6 +63,10 @@ class CopilotAdapter:
         """
         Send a chat completion request to GitHub Copilot.
         
+        Note: GitHub Copilot API may require specific endpoints or SDK usage.
+        This implementation provides a compatible interface that can be adapted
+        when official endpoints are available.
+        
         Args:
             messages: List of message objects with 'role' and 'content'
             model: Model identifier
@@ -63,17 +80,22 @@ class CopilotAdapter:
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "Editor-Version": "vscode/1.80.0",  # Required by some Copilot endpoints
+            "Editor-Plugin-Version": "copilot/1.0.0"
         }
         
+        # GitHub Copilot may use OpenAI-compatible format
         payload = {
             "messages": messages,
-            "model": model,
             "stream": stream,
             "max_tokens": max_tokens,
-            "temperature": temperature
+            "temperature": temperature,
+            "n": 1
         }
         
+        # Try standard completions endpoint
+        # Note: Actual endpoint may vary based on GitHub Copilot access level
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 f"{self.base_url}/chat/completions",
@@ -119,6 +141,10 @@ class CopilotAdapter:
         """
         Execute a multi-step agentic workflow.
         
+        Note: This uses the standard chat completions endpoint with enhanced
+        system prompts to simulate agentic behavior. Future GitHub Copilot SDK
+        may provide dedicated agent endpoints.
+        
         Args:
             task: Task description
             tools: Optional list of tools the agent can use
@@ -130,33 +156,19 @@ class CopilotAdapter:
             {
                 "role": "system",
                 "content": "You are a GitHub Copilot agent capable of multi-step task execution. "
-                          "Break down complex tasks, use available tools, and provide detailed solutions."
+                          "Break down complex tasks, provide detailed solutions, and explain your reasoning. "
+                          "When appropriate, suggest commands, code, or configuration changes."
             },
             {"role": "user", "content": task}
         ]
         
-        payload = {
-            "messages": messages,
-            "model": "copilot-agent",
-            "max_tokens": 2048
-        }
-        
-        if tools:
-            payload["tools"] = tools
-        
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(
-                f"{self.base_url}/agent/execute",
-                json=payload,
-                headers=headers
-            )
-            response.raise_for_status()
-            return response.json()
+        # Use the standard chat completion with agent-like prompting
+        return await self.chat_completion(
+            messages=messages,
+            model="copilot-gpt-4",  # Use standard Copilot model
+            max_tokens=2048,
+            temperature=0.3  # Lower temperature for more focused agent-like responses
+        )
 
 
 # Synchronous wrapper for backwards compatibility
