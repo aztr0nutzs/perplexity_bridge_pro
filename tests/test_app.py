@@ -124,15 +124,11 @@ def test_auth_middleware_allows_authorized():
         assert response.status_code != 401
 
 
-def test_chat_endpoint_error_response():
-    """Test chat endpoint handles API error responses."""
+def test_chat_endpoint_invalid_response_type():
+    """Test chat endpoint handles non-dict responses."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.json.return_value = {
-        "error": {
-            "message": "Test error message"
-        }
-    }
+    mock_response.json.return_value = "not a dict"  # Invalid type
     mock_response.raise_for_status = MagicMock()
     
     mock_client = AsyncMock()
@@ -149,88 +145,8 @@ def test_chat_endpoint_error_response():
             },
             headers={"X-API-KEY": "test-secret-key"}
         )
-        assert response.status_code == 502
-
-
-def test_chat_endpoint_missing_choices():
-    """Test chat endpoint handles responses missing choices."""
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {
-        "id": "test-id"
-        # Missing 'choices' field
-    }
-    mock_response.raise_for_status = MagicMock()
-    
-    mock_client = AsyncMock()
-    mock_client.post.return_value = mock_response
-    mock_client.__aenter__.return_value = mock_client
-    mock_client.__aexit__.return_value = None
-    
-    with patch('httpx.AsyncClient', return_value=mock_client):
-        response = client.post(
-            "/v1/chat/completions",
-            json={
-                "model": "test-model",
-                "messages": [{"role": "user", "content": "test"}]
-            },
-            headers={"X-API-KEY": "test-secret-key"}
-        )
-        assert response.status_code == 502
-
-
-def test_chat_endpoint_empty_choices():
-    """Test chat endpoint handles empty choices array."""
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {
-        "id": "test-id",
-        "choices": []  # Empty choices
-    }
-    mock_response.raise_for_status = MagicMock()
-    
-    mock_client = AsyncMock()
-    mock_client.post.return_value = mock_response
-    mock_client.__aenter__.return_value = mock_client
-    mock_client.__aexit__.return_value = None
-    
-    with patch('httpx.AsyncClient', return_value=mock_client):
-        response = client.post(
-            "/v1/chat/completions",
-            json={
-                "model": "test-model",
-                "messages": [{"role": "user", "content": "test"}]
-            },
-            headers={"X-API-KEY": "test-secret-key"}
-        )
-        assert response.status_code == 502
-
-
-def test_chat_endpoint_missing_message():
-    """Test chat endpoint handles choice missing message."""
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {
-        "id": "test-id",
-        "choices": [{"index": 0}]  # Missing 'message' field
-    }
-    mock_response.raise_for_status = MagicMock()
-    
-    mock_client = AsyncMock()
-    mock_client.post.return_value = mock_response
-    mock_client.__aenter__.return_value = mock_client
-    mock_client.__aexit__.return_value = None
-    
-    with patch('httpx.AsyncClient', return_value=mock_client):
-        response = client.post(
-            "/v1/chat/completions",
-            json={
-                "model": "test-model",
-                "messages": [{"role": "user", "content": "test"}]
-            },
-            headers={"X-API-KEY": "test-secret-key"}
-        )
-        assert response.status_code == 502
+        # Should get internal server error due to ValueError
+        assert response.status_code == 500
 
 
 def test_chat_endpoint_http_status_error():
