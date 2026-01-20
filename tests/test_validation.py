@@ -105,7 +105,8 @@ class TestChatReqValidation:
         """Test empty messages list is rejected."""
         with pytest.raises(ValidationError) as exc_info:
             ChatReq(model="gpt-5.2", messages=[])
-        assert "At least one message is required" in str(exc_info.value)
+        # Pydantic V2 error message is different
+        assert "at least 1 item" in str(exc_info.value).lower() or "at least one message" in str(exc_info.value).lower()
     
     def test_too_many_messages(self):
         """Test more than 100 messages is rejected."""

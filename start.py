@@ -29,7 +29,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def check_dependencies():
+def check_dependencies() -> bool:
     """Check if required dependencies are installed."""
     try:
         import fastapi
@@ -46,7 +46,7 @@ def check_dependencies():
         return False
 
 
-def check_config():
+def check_config() -> bool:
     """Check if configuration is valid."""
     try:
         from config import PERPLEXITY_KEY, validate_config
@@ -65,7 +65,7 @@ def check_config():
         return False
 
 
-def open_browser(url, delay=2):
+def open_browser(url: str, delay: int = 2) -> None:
     """Open browser after a delay."""
     def _open():
         time.sleep(delay)
@@ -87,7 +87,7 @@ def check_port_available(host: str, port: int) -> bool:
         return sock.connect_ex((host, port)) != 0
 
 
-def start_server():
+def start_server() -> None:
     """Start the FastAPI server."""
     try:
         import uvicorn
@@ -135,7 +135,7 @@ def start_server():
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     logger.info("Perplexity Bridge - Startup Check")
     logger.info("-" * 60)
