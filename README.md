@@ -2,6 +2,11 @@
 
 # Perplexity Bridge Pro
 
+![Python CI](https://github.com/aztr0nutzs/perplexity_bridge_pro/actions/workflows/python.yml/badge.svg)
+![Android CI](https://github.com/aztr0nutzs/perplexity_bridge_pro/actions/workflows/android.yml/badge.svg)
+![Security](https://github.com/aztr0nutzs/perplexity_bridge_pro/actions/workflows/security.yml/badge.svg)
+[![codecov](https://codecov.io/gh/aztr0nutzs/perplexity_bridge_pro/branch/main/graph/badge.svg)](https://codecov.io/gh/aztr0nutzs/perplexity_bridge_pro)
+
 ## Introduction
 
 **Perplexity Bridge Pro** is a powerful, open-source FastAPI-based proxy bridge that provides unified access to multiple state-of-the-art AI models including Perplexity AI (GPT-5.2, Gemini 3 Pro, Claude 4.5) and GitHub Copilot. This project provides a robust intermediary layer with advanced features like intelligent model routing, rate limiting, real-time WebSocket streaming, a modern web-based dashboard, and integrated development tools.
