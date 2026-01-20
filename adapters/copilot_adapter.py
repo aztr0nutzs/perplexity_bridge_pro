@@ -205,4 +205,7 @@ class CopilotAdapterSync:
         response.raise_for_status()
         
         data = response.json()
-        return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+        choices = data.get("choices", [])
+        if not choices:
+            return ""
+        return choices[0].get("message", {}).get("content", "")
