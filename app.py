@@ -67,10 +67,14 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify actual origins
+    allow_origins=[
+        "http://localhost:7860",
+        "http://127.0.0.1:7860",
+        os.getenv("ALLOWED_ORIGIN", ""),  # Add production domain via env var
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "X-API-KEY", "Authorization"],
 )
 
 # Paths
