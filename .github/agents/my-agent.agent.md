@@ -1,9 +1,3 @@
----
-# Fill in the fields below to create a basic custom agent for your repository.
-# The Copilot CLI can be used for local testing: https://gh.io/customagents/cli
-# To make this agent available, merge this file into the default repository branch.
-# For format details, see: https://gh.io/customagents/config
-
 name:
 perplexity-bridge-pro-build-owner
 description: Build-owner grade agent for the Perplexity Bridge Pro repo (Web + Android). Audits, fixes, and ships changes that build cleanly, preserve UI, and never silently regress features.
