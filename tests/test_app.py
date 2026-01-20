@@ -1,6 +1,7 @@
 """Tests for the FastAPI application endpoints."""
 import os
 import pytest
+from unittest.mock import patch, AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 
 # Set test environment before importing app
@@ -72,8 +73,6 @@ def test_auth_middleware_blocks_unauthorized():
 
 def test_auth_middleware_allows_authorized():
     """Test authentication middleware allows requests with valid API key."""
-    from unittest.mock import patch, AsyncMock, MagicMock
-    
     # Create mock response
     mock_response = MagicMock()
     mock_response.status_code = 200
