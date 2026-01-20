@@ -1,6 +1,5 @@
 """Tests for the FastAPI application endpoints."""
 import os
-import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 
@@ -39,7 +38,7 @@ def test_models_endpoint():
     assert "data" in data
     assert isinstance(data["models"], list)
     assert len(data["models"]) > 0
-    
+
     # Verify each model has required fields
     for model in data["models"]:
         assert "id" in model
@@ -53,10 +52,10 @@ def test_models_endpoint_structure():
     """Test models endpoint data structure matches expected format."""
     response = client.get("/models")
     data = response.json()
-    
+
     # Check that data list matches models
     assert len(data["data"]) == len(data["models"])
-    
+
     # Each item in data should have 'object' field
     for item in data["data"]:
         assert item["object"] == "model"
@@ -78,17 +77,17 @@ def test_auth_middleware_allows_authorized():
     mock_response.status_code = 200
     mock_response.json.return_value = {
         "id": "test-id",
-        "model": "test-model", 
+        "model": "test-model",
         "choices": [{"message": {"role": "assistant", "content": "test response"}}]
     }
     mock_response.raise_for_status = MagicMock()
-    
+
     # Create mock client
     mock_client = AsyncMock()
     mock_client.post.return_value = mock_response
     mock_client.__aenter__.return_value = mock_client
     mock_client.__aexit__.return_value = None
-    
+
     with patch('httpx.AsyncClient', return_value=mock_client):
         response = client.post(
             "/v1/chat/completions",
@@ -98,7 +97,7 @@ def test_auth_middleware_allows_authorized():
             },
             headers={"X-API-KEY": "test-secret-key"}
         )
-        # Auth should pass (not 401) - test may fail for other reasons like 
+        # Auth should pass (not 401) - test may fail for other reasons like
         # model validation, but the key point is auth passes
         assert response.status_code != 401
 

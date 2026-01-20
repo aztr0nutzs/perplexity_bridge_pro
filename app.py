@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, validator
 from typing import List, Dict, Optional, Union, Any
@@ -36,24 +36,24 @@ app = FastAPI(
     title="Perplexity Bridge API",
     description="""
     Proxy bridge for Perplexity AI API with comprehensive features:
-    
+
     * **REST API**: Standard HTTP POST endpoint for chat completions
     * **WebSocket Streaming**: Real-time streaming responses
     * **Rate Limiting**: Configurable per-IP rate limiting
     * **Authentication**: API key-based authentication
     * **Error Handling**: Comprehensive error handling and logging
-    
+
     ## Authentication
-    
+
     Most endpoints require an `X-API-KEY` header with your bridge secret key.
     Public endpoints: `/health`, `/models`, `/docs`
-    
+
     ## Rate Limiting
-    
+
     Default rate limit: 10 requests per minute per IP address.
-    
+
     ## Models
-    
+
     Use the `/models` endpoint to get a list of available models.
     """,
     version="1.0.0",
@@ -92,6 +92,7 @@ assets_dir = Path(__file__).parent / "assets"
 if assets_dir.exists():
     app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
 
+
 @app.get("/")
 async def root():
     """Serve the main UI."""
@@ -104,14 +105,14 @@ class Message(BaseModel):
     """Chat message model."""
     role: str = Field(..., description="Message role (user, assistant, system)")
     content: str = Field(..., description="Message content")
-    
+
     @validator('role')
     def validate_role(cls, v):
         valid_roles = ['user', 'assistant', 'system']
         if v not in valid_roles:
             raise ValueError(f"Role must be one of {valid_roles}")
         return v
-    
+
     @validator('content')
     def validate_content(cls, v):
         if not v or not v.strip():
@@ -131,13 +132,13 @@ class ChatReq(BaseModel):
         default=None,
         description="Optional tools configuration"
     )
-    
+
     @validator('model')
     def validate_model(cls, v):
         if not v or not v.strip():
             raise ValueError("Model name cannot be empty")
         return v.strip()
-    
+
     @validator('messages')
     def validate_messages(cls, v):
         if not v:
@@ -145,7 +146,7 @@ class ChatReq(BaseModel):
         if len(v) > 100:
             raise ValueError("Maximum 100 messages allowed")
         return v
-    
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -159,6 +160,7 @@ class ChatReq(BaseModel):
                 "frequency_penalty": 1
             }
         }
+
 
 class TerminalReq(BaseModel):
     """Terminal execution request."""
@@ -177,7 +179,7 @@ def get_perplexity_key() -> str:
 def get_model_provider(model_id: str) -> str:
     """
     Determine which API provider to use based on model ID.
-    
+
     Returns:
         'perplexity' or 'github-copilot'
     """
@@ -194,7 +196,7 @@ async def _perplexity_chat(req: ChatReq, request_data: dict) -> Any:
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
-    
+
     if req.stream:
         async def stream_response():
             async with httpx.AsyncClient(timeout=120.0) as client:
@@ -217,7 +219,7 @@ async def _perplexity_chat(req: ChatReq, request_data: dict) -> Any:
                             yield chunk
 
         return StreamingResponse(stream_response(), media_type="text/event-stream")
-    
+
     async with httpx.AsyncClient(timeout=60.0) as client:
         response = await client.post(
             BASE_URL,
@@ -226,10 +228,10 @@ async def _perplexity_chat(req: ChatReq, request_data: dict) -> Any:
         )
         response.raise_for_status()
         response_data = response.json()
-        
+
         if not isinstance(response_data, dict):
             raise ValueError("Response is not a valid JSON object")
-        
+
         if "error" in response_data:
             error_msg = response_data.get("error", {}).get("message", "Unknown API error")
             logger.error(f"Perplexity API returned error: {error_msg}")
@@ -237,21 +239,21 @@ async def _perplexity_chat(req: ChatReq, request_data: dict) -> Any:
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=f"Perplexity API error: {error_msg}"
             )
-        
+
         if "choices" not in response_data:
             logger.error("Response missing 'choices' field")
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Invalid response format: missing 'choices' field"
             )
-        
+
         if not isinstance(response_data["choices"], list) or len(response_data["choices"]) == 0:
             logger.error("Response has no choices")
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Invalid response format: no choices returned"
             )
-        
+
         choice = response_data["choices"][0]
         if "message" not in choice:
             logger.error("Choice missing 'message' field")
@@ -259,7 +261,7 @@ async def _perplexity_chat(req: ChatReq, request_data: dict) -> Any:
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Invalid response format: choice missing 'message' field"
             )
-        
+
         logger.info("Successfully validated and returning response")
         return response_data
 
@@ -271,10 +273,10 @@ async def _copilot_chat(req: ChatReq, request_data: dict) -> Any:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="GitHub Copilot API is not configured. Please set GITHUB_COPILOT_API_KEY."
         )
-    
+
     try:
         adapter = CopilotAdapter(api_key=GITHUB_COPILOT_KEY, base_url=GITHUB_COPILOT_BASE_URL)
-        
+
         if req.stream:
             # For streaming, we'd need to implement streaming in the adapter
             # For now, return a note that streaming is not yet supported for Copilot
@@ -282,7 +284,7 @@ async def _copilot_chat(req: ChatReq, request_data: dict) -> Any:
                 status_code=status.HTTP_501_NOT_IMPLEMENTED,
                 detail="Streaming is not yet implemented for GitHub Copilot. Please disable streaming."
             )
-        
+
         response_data = await adapter.chat_completion(
             messages=[m.dict() for m in req.messages],
             model=req.model,
@@ -290,10 +292,10 @@ async def _copilot_chat(req: ChatReq, request_data: dict) -> Any:
             max_tokens=req.max_tokens,
             temperature=req.temperature
         )
-        
+
         logger.info("Successfully received response from GitHub Copilot")
         return response_data
-        
+
     except Exception as e:
         logger.error(f"GitHub Copilot API error: {str(e)}")
         raise HTTPException(
@@ -317,7 +319,7 @@ async def auth(req: Request, call_next):
         or req.url.path == "/assets"
     ):
         return await call_next(req)
-    
+
     api_key = req.headers.get("X-API-KEY")
     if api_key != BRIDGE_SECRET:
         logger.warning(f"Unauthorized request attempt from {get_remote_address(req)}")
@@ -347,7 +349,7 @@ async def get_models():
     Model availability depends on your Perplexity API subscription tier.
     """
     models = list(MODELS)  # Make a copy to avoid modifying the original
-    
+
     # Add GitHub Copilot models if configured
     if has_github_copilot():
         models.extend([
@@ -366,7 +368,7 @@ async def get_models():
                 "category": "coding"
             },
         ])
-    
+
     data = [
         {
             "id": m["id"],
@@ -386,29 +388,29 @@ async def get_models():
 async def chat(req: ChatReq, request: Request):
     """
     Chat completions endpoint.
-    
+
     Proxies requests to Perplexity AI API or GitHub Copilot API based on model selection.
-    
+
     **Authentication Required**: Include `X-API-KEY` header
-    
+
     **Rate Limited**: 10 requests per minute per IP (default)
-    
+
     **Request Validation**:
     - Model name must not be empty
     - At least one message required (max 100)
     - Message roles must be: user, assistant, or system
     - Message content cannot be empty
     - max_tokens: 1-4096, temperature: 0.0-2.0, frequency_penalty: -2.0-2.0
-    
+
     **Supported Providers**:
     - Perplexity: GPT-5.2, Gemini 3 Pro, Claude 4.5, Sonar models, etc.
     - GitHub Copilot: copilot-gpt-4, copilot-agent
-    
+
     **Response**:
     - Validates response structure before returning
     - Returns error if API response is malformed
     - Returns HTTP 502 if upstream API returns an error
-    
+
     **Example Request**:
     ```json
     {
@@ -425,12 +427,12 @@ async def chat(req: ChatReq, request: Request):
         request_data = req.dict()
         provider = get_model_provider(req.model)
         logger.info(f"Processing chat request with model: {req.model} (provider: {provider})")
-        
+
         if provider == "github-copilot":
             return await _copilot_chat(req, request_data)
         else:
             return await _perplexity_chat(req, request_data)
-            
+
     except httpx.HTTPStatusError as e:
         logger.error(f"API error: {e.response.status_code} - {e.response.text}")
         raise HTTPException(
@@ -461,17 +463,17 @@ async def chat(req: ChatReq, request: Request):
 async def ws_chat(websocket: WebSocket):
     """
     WebSocket endpoint for streaming chat completions.
-    
-    **Authentication Required**: 
+
+    **Authentication Required**:
     - Query parameter: `?api_key=your_secret`
     - Or header: `X-API-KEY: your_secret`
-    
+
     **Protocol**:
     1. Client connects to WebSocket
     2. Client sends JSON message with chat request
     3. Server streams response chunks in Server-Sent Events (SSE) format
     4. Server sends `[DONE]` when complete
-    
+
     **Request Format** (same as REST API):
     ```json
     {
@@ -480,15 +482,15 @@ async def ws_chat(websocket: WebSocket):
       "stream": true
     }
     ```
-    
+
     **Response Format**:
     - SSE format chunks: `data: {...}\n\n`
     - Final chunk: `data: [DONE]\n\n`
-    
+
     **Error Handling**:
     - Sends JSON error messages: `{"error": "message", "type": "error"}`
     - Closes connection on critical errors
-    
+
     **Example Usage**:
     ```javascript
     const ws = new WebSocket('ws://localhost:7860/ws/chat?api_key=secret');
@@ -503,21 +505,21 @@ async def ws_chat(websocket: WebSocket):
     """
     # Get API key from query parameter or header
     api_key = websocket.query_params.get("api_key") or websocket.headers.get("X-API-KEY")
-    
+
     if api_key != BRIDGE_SECRET:
         logger.warning(f"Unauthorized WebSocket connection attempt from {websocket.client}")
         await websocket.close(code=1008, reason="Unauthorized")  # 1008 = Policy Violation
         return
-    
+
     await websocket.accept()
     logger.info(f"WebSocket connection accepted from {websocket.client}")
-    
+
     try:
         while True:
             try:
                 # Receive message from client
                 data = await websocket.receive_text()
-                
+
                 # Parse payload
                 try:
                     payload = json.loads(data)
@@ -528,10 +530,10 @@ async def ws_chat(websocket: WebSocket):
                         "type": "error"
                     }))
                     continue
-                
+
                 # Ensure stream is True
                 payload["stream"] = True
-                
+
                 try:
                     key = get_perplexity_key()
                 except HTTPException as e:
@@ -545,9 +547,9 @@ async def ws_chat(websocket: WebSocket):
                     "Authorization": f"Bearer {key}",
                     "Content-Type": "application/json"
                 }
-                
-                logger.info(f"Processing WebSocket chat request")
-                
+
+                logger.info("Processing WebSocket chat request")
+
                 # Stream response from Perplexity API
                 async with httpx.AsyncClient(timeout=120.0) as client:
                     try:
@@ -558,11 +560,11 @@ async def ws_chat(websocket: WebSocket):
                             headers=headers
                         ) as response:
                             response.raise_for_status()
-                            
+
                             async for chunk in response.aiter_text():
                                 if chunk:
                                     await websocket.send_text(chunk)
-                                    
+
                     except httpx.HTTPStatusError as e:
                         logger.error(f"Perplexity API error in WebSocket: {e.response.status_code}")
                         await websocket.send_text(json.dumps({
@@ -575,7 +577,7 @@ async def ws_chat(websocket: WebSocket):
                             "error": f"Connection error: {str(e)}",
                             "type": "error"
                         }))
-                        
+
             except WebSocketDisconnect:
                 logger.info(f"WebSocket client disconnected: {websocket.client}")
                 break
@@ -586,10 +588,10 @@ async def ws_chat(websocket: WebSocket):
                         "error": f"Internal error: {str(e)}",
                         "type": "error"
                     }))
-                except:
+                except Exception:
                     # Connection may be closed, just break
                     break
-                    
+
     except WebSocketDisconnect:
         logger.info(f"WebSocket disconnected normally: {websocket.client}")
     except Exception as e:
@@ -597,7 +599,7 @@ async def ws_chat(websocket: WebSocket):
     finally:
         try:
             await websocket.close()
-        except:
+        except Exception:
             pass
 
 

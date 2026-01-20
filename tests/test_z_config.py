@@ -9,8 +9,6 @@ def test_has_github_copilot_with_key():
     os.environ["GITHUB_COPILOT_API_KEY"] = "test-key"
     try:
         # Re-import to get fresh function
-        from config import has_github_copilot
-        # Clear the module cache to force reload
         import importlib
         import config
         importlib.reload(config)
@@ -23,8 +21,6 @@ def test_has_github_copilot_with_key():
         elif "GITHUB_COPILOT_API_KEY" in os.environ:
             del os.environ["GITHUB_COPILOT_API_KEY"]
         # Reload again to restore original state
-        import importlib
-        import config
         importlib.reload(config)
 
 
@@ -63,7 +59,7 @@ def test_validate_config_no_key():
         import config
         importlib.reload(config)
         from config import validate_config
-        
+
         with pytest.raises(ValueError, match="PERPLEXITY_API_KEY"):
             validate_config()
     finally:
@@ -92,7 +88,7 @@ def test_validate_config_empty_key():
         import config
         importlib.reload(config)
         from config import validate_config
-        
+
         with pytest.raises(ValueError, match="cannot be empty"):
             validate_config()
     finally:
