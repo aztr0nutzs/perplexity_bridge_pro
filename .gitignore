@@ -24,6 +24,16 @@ parts/
 sdist/
 var/
 wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Environment variables
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
@@ -45,11 +55,29 @@ env/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node modules (VSCode extension)
+node_modules/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Distribution
 # Node modules (for VSCode extension)
 node_modules/
 
