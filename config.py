@@ -7,7 +7,7 @@ load_dotenv()
 
 # Perplexity Configuration
 PERPLEXITY_KEY: Optional[str] = os.getenv("PERPLEXITY_API_KEY")
-BRIDGE_SECRET: str = os.getenv("BRIDGE_SECRET", "dev-secret")
+BRIDGE_SECRET: Optional[str] = os.getenv("BRIDGE_SECRET")
 BASE_URL: str = os.getenv("PERPLEXITY_BASE_URL", "https://api.perplexity.ai/chat/completions")
 
 # GitHub Copilot Configuration
@@ -16,6 +16,14 @@ GITHUB_COPILOT_BASE_URL: str = os.getenv("GITHUB_COPILOT_BASE_URL", "https://api
 
 # Rate Limiting
 RATE_LIMIT: str = "10/minute"
+
+# Validate BRIDGE_SECRET on import
+if not BRIDGE_SECRET or not BRIDGE_SECRET.strip():
+    raise ValueError(
+        "BRIDGE_SECRET environment variable is required for security. "
+        "Please set it to a strong, unique value in your .env file. "
+        "Example: BRIDGE_SECRET=your_secure_random_string_here"
+    )
 
 
 def validate_config() -> None:
