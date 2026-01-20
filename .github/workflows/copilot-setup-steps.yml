@@ -1,0 +1,104 @@
+name: "Copilot Setup Steps"
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+      - scripts/copilot/setup.sh
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+      - scripts/copilot/setup.sh
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+
+    # Keep this minimal. Copilot gets its own token for its operations.
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code (with LFS)
+        uses: actions/checkout@v5
+        with:
+          lfs: true
+
+      # Detect Gradle version so we can choose a safe Java default.
+      - name: Detect toolchain needs
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Default choices (override if we detect better)
+          NODE_VERSION="20"
+          JAVA_VERSION="17"
+
+          # Node version hints
+          if [[ -f ".nvmrc" ]]; then
+            NODE_VERSION="$(tr -d ' \t\n\r' < .nvmrc | sed 's/^v//')"
+          elif [[ -f ".node-version" ]]; then
+            NODE_VERSION="$(tr -d ' \t\n\r' < .node-version | sed 's/^v//')"
+          fi
+
+          # Gradle version hints: parse distributionUrl=.../gradle-X.Y(-bin|-all).zip
+          GRADLE_WRAPPER=""
+          if [[ -f "gradle/wrapper/gradle-wrapper.properties" ]]; then
+            GRADLE_WRAPPER="$(grep -E '^distributionUrl=' gradle/wrapper/gradle-wrapper.properties | sed 's/^distributionUrl=//')"
+          fi
+
+          GRADLE_VERSION=""
+          if [[ -n "$GRADLE_WRAPPER" ]]; then
+            GRADLE_VERSION="$(echo "$GRADLE_WRAPPER" | sed -n 's/.*gradle-\([0-9]\+\.[0-9]\+\).*/\1/p')"
+          fi
+
+          # Very conservative heuristic:
+          # - Gradle < 7.3 tends to be happier on Java 11
+          # - Otherwise Java 17 is the Android default for modern AGP
+          if [[ -n "$GRADLE_VERSION" ]]; then
+            MAJOR="${GRADLE_VERSION%%.*}"
+            MINOR="${GRADLE_VERSION#*.}"
+            if [[ "$MAJOR" -lt 7 ]] || ([[ "$MAJOR" -eq 7 ]] && [[ "$MINOR" -lt 3 ]]); then
+              JAVA_VERSION="11"
+            fi
+          fi
+
+          echo "node_version=$NODE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "java_version=$JAVA_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ steps.detect.outputs.java_version }}
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.detect.outputs.node_version }}
+          # We'll pick the cache strategy dynamically inside the script, but setup-node cache
+          # needs a static value. Use npm as a safe default.
+          cache: npm
+
+      - name: Run unified repo setup (Web + Android)
+        shell: bash
+        env:
+          # Optional: provide private registry creds / endpoints via the `copilot` environment
+          # (Settings -> Environments -> copilot -> secrets/vars).
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GPR_TOKEN: ${{ secrets.GPR_TOKEN }}
+          MAVEN_REPO_USER: ${{ secrets.MAVEN_REPO_USER }}
+          MAVEN_REPO_PASS: ${{ secrets.MAVEN_REPO_PASS }}
+          PERPLEXITY_BRIDGE_BASE_URL: ${{ vars.PERPLEXITY_BRIDGE_BASE_URL }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/copilot/setup.sh
+          scripts/copilot/setup.sh
