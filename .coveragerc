@@ -12,6 +12,8 @@ omit =
     */vscode_extension/*
     */ui/*
     */assets/*
+    */agent/*
+    adapters/roo_adapter.py
     setup.py
     */site-packages/*
 

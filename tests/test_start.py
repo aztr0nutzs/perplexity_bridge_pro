@@ -63,6 +63,30 @@ def test_check_config_failure():
             os.environ["BRIDGE_SECRET"] = old_secret
 
 
+def test_check_config_exception():
+    """Test configuration check handles generic exceptions."""
+    # Save current env vars
+    old_key = os.environ.get("PERPLEXITY_API_KEY")
+    old_secret = os.environ.get("BRIDGE_SECRET")
+
+    try:
+        # Set up environment to allow config import
+        os.environ["BRIDGE_SECRET"] = "test-secret"
+        os.environ["PERPLEXITY_API_KEY"] = "test-key"
+
+        # Mock validate_config at the module level to raise a generic exception
+        with patch('config.validate_config', side_effect=Exception("Unexpected error")):
+            from start import check_config
+            result = check_config()
+            assert result is False
+    finally:
+        # Restore env vars
+        if old_key:
+            os.environ["PERPLEXITY_API_KEY"] = old_key
+        if old_secret:
+            os.environ["BRIDGE_SECRET"] = old_secret
+
+
 def test_check_port_available_free_port():
     """Test port availability check for a free port."""
     from start import check_port_available
