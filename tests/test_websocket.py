@@ -2,7 +2,6 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, AsyncMock, MagicMock
 import json
 
 # Set test environment before importing app
@@ -34,7 +33,7 @@ def test_websocket_connection_with_valid_key():
         with client.websocket_connect(f"/ws?api_key={os.environ['BRIDGE_SECRET']}") as websocket:
             # Connection should be established
             assert websocket is not None
-            
+
             # Try to receive welcome message if any
             # Note: Actual implementation may vary
     except Exception as e:
@@ -52,7 +51,7 @@ def test_websocket_message_format():
         ],
         "stream": True
     }
-    
+
     # Validate format structure
     assert "model" in expected_format
     assert "messages" in expected_format
@@ -70,12 +69,12 @@ async def test_websocket_streaming_response_structure():
         'data: {"choices": [{"delta": {"content": " world"}}]}\n\n',
         'data: [DONE]\n\n'
     ]
-    
+
     # Verify chunk format
     for chunk in mock_chunks[:-1]:  # Exclude [DONE]
         assert chunk.startswith('data: ')
         assert chunk.endswith('\n\n')
-        
+
         # Extract JSON
         json_str = chunk[6:-2]  # Remove 'data: ' and '\n\n'
         data = json.loads(json_str)
@@ -89,7 +88,7 @@ def test_websocket_error_handling():
         "error": "Invalid model",
         "type": "error"
     }
-    
+
     # Validate error format
     assert "error" in error_response
     assert "type" in error_response
@@ -112,7 +111,7 @@ def test_websocket_message_size_limit():
         "model": "gpt-5.2",
         "messages": [{"role": "user", "content": large_content}]
     }
-    
+
     # Should be serializable
     json_str = json.dumps(message)
     assert len(json_str) > 10000
@@ -126,13 +125,13 @@ def test_websocket_multiple_messages():
         {"role": "assistant", "content": "Hi"},
         {"role": "user", "content": "How are you?"}
     ]
-    
+
     request = {
         "model": "gpt-5.2",
         "messages": messages,
         "stream": True
     }
-    
+
     # Should be valid format
     assert len(request["messages"]) == 4
     assert request["stream"] is True
@@ -153,7 +152,7 @@ def test_websocket_invalid_json():
     """Test WebSocket handling of invalid JSON."""
     # Invalid JSON should be rejected
     invalid_json = "not a json string"
-    
+
     with pytest.raises(json.JSONDecodeError):
         json.loads(invalid_json)
 
@@ -166,7 +165,7 @@ def test_websocket_missing_required_fields():
     }
     # Would fail validation if sent - testing documentation
     assert "messages" in message_missing_model
-    
+
     # Missing messages - document expected validation behavior
     message_missing_messages = {
         "model": "gpt-5.2"
@@ -191,7 +190,7 @@ def test_websocket_reconnection():
         # First connection
         with client.websocket_connect(f"/ws?api_key={os.environ['BRIDGE_SECRET']}") as ws1:
             ws1.close()
-        
+
         # Second connection should work
         with client.websocket_connect(f"/ws?api_key={os.environ['BRIDGE_SECRET']}") as ws2:
             assert ws2 is not None
@@ -204,7 +203,7 @@ def test_websocket_authentication_methods():
     # Query parameter
     query_auth = f"/ws?api_key={os.environ['BRIDGE_SECRET']}"
     assert "api_key=" in query_auth
-    
+
     # Header authentication could also be supported
     # This test documents expected auth methods
 
@@ -218,7 +217,7 @@ def test_websocket_stream_parameter():
         "stream": True
     }
     assert req_streaming["stream"] is True
-    
+
     # Stream disabled (though unusual for WebSocket)
     req_no_stream = {
         "model": "gpt-5.2",
@@ -236,7 +235,7 @@ def test_websocket_model_routing():
         "messages": [{"role": "user", "content": "test"}]
     }
     assert not perplexity_req["model"].startswith("copilot-")
-    
+
     # GitHub Copilot model
     copilot_req = {
         "model": "copilot-gpt-4",

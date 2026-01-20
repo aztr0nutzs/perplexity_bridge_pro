@@ -10,7 +10,6 @@ import time
 import logging
 import webbrowser
 import threading
-import subprocess
 import socket
 from dotenv import load_dotenv
 from pathlib import Path
@@ -32,11 +31,11 @@ logger = logging.getLogger(__name__)
 def check_dependencies() -> bool:
     """Check if required dependencies are installed."""
     try:
-        import fastapi
-        import uvicorn
-        import httpx
-        import pydantic
-        import slowapi
+        import fastapi  # noqa: F401
+        import uvicorn  # noqa: F401
+        import httpx  # noqa: F401
+        import pydantic  # noqa: F401
+        import slowapi  # noqa: F401
         logger.info("✓ All dependencies found")
         return True
     except ImportError as e:
@@ -49,7 +48,7 @@ def check_dependencies() -> bool:
 def check_config() -> bool:
     """Check if configuration is valid."""
     try:
-        from config import PERPLEXITY_KEY, validate_config
+        from config import validate_config  # noqa: F401
         validate_config()
         logger.info("✓ Configuration valid")
         return True
@@ -75,7 +74,7 @@ def open_browser(url: str, delay: int = 2) -> None:
         except Exception as e:
             logger.warning(f"Could not open browser automatically: {e}")
             logger.info(f"Please open manually: {url}")
-    
+
     thread = threading.Thread(target=_open, daemon=True)
     thread.start()
 
@@ -92,7 +91,7 @@ def start_server() -> None:
     try:
         import uvicorn
         from config import BRIDGE_SECRET
-        
+
         host = os.getenv("BRIDGE_HOST", "127.0.0.1")
         port = int(os.getenv("BRIDGE_PORT", "7860"))
         url = f"http://{host}:{port}"
@@ -101,7 +100,7 @@ def start_server() -> None:
             logger.error(f"✗ Port {port} is already in use on {host}")
             logger.error("Please stop the other process or set BRIDGE_PORT to a free port.")
             sys.exit(1)
-        
+
         logger.info("=" * 60)
         logger.info("Perplexity Bridge - Starting Server")
         logger.info("=" * 60)
@@ -110,10 +109,10 @@ def start_server() -> None:
         logger.info(f"API Key: {'*' * (len(BRIDGE_SECRET) - 4) + BRIDGE_SECRET[-4:] if len(BRIDGE_SECRET) > 4 else '****'}")
         logger.info("=" * 60)
         logger.info("\nPress Ctrl+C to stop the server\n")
-        
+
         # Open browser after delay
         open_browser(url)
-        
+
         # Start server
         uvicorn.run(
             "app:app",
@@ -122,7 +121,7 @@ def start_server() -> None:
             log_level="info",
             access_log=True
         )
-        
+
     except KeyboardInterrupt:
         logger.info("\n\nServer stopped by user")
         sys.exit(0)
@@ -141,18 +140,18 @@ def main() -> None:
     logger.info("-" * 60)
 
     load_dotenv()
-    
+
     # Check dependencies
     if not check_dependencies():
         sys.exit(1)
-    
+
     # Check configuration
     if not check_config():
         logger.warning("\n⚠ Continuing without API key validation...")
         logger.warning("The server will start but API calls will fail until API key is set.")
         logger.warning("You can set it in the UI settings.\n")
         time.sleep(3)
-    
+
     # Start server
     start_server()
 

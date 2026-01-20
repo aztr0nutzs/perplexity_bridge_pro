@@ -27,7 +27,7 @@ def test_chat_endpoint_timeout_error():
     mock_client.post.side_effect = httpx.TimeoutException("Request timed out")
     mock_client.__aenter__.return_value = mock_client
     mock_client.__aexit__.return_value = None
-    
+
     with patch('httpx.AsyncClient', return_value=mock_client):
         response = client.post(
             "/v1/chat/completions",
@@ -38,7 +38,7 @@ def test_chat_endpoint_timeout_error():
             },
             headers={"X-API-KEY": "test-secret-key"}
         )
-        
+
         assert response.status_code == 504  # Gateway Timeout
 
 
@@ -48,7 +48,7 @@ def test_chat_endpoint_request_error():
     mock_client.post.side_effect = httpx.RequestError("Connection failed")
     mock_client.__aenter__.return_value = mock_client
     mock_client.__aexit__.return_value = None
-    
+
     with patch('httpx.AsyncClient', return_value=mock_client):
         response = client.post(
             "/v1/chat/completions",
@@ -59,7 +59,7 @@ def test_chat_endpoint_request_error():
             },
             headers={"X-API-KEY": "test-secret-key"}
         )
-        
+
         assert response.status_code == 502  # Bad Gateway
 
 
@@ -68,14 +68,14 @@ def test_chat_endpoint_http_status_error():
     mock_response = MagicMock()
     mock_response.status_code = 500
     mock_response.text = "Internal server error"
-    
+
     mock_client = AsyncMock()
     mock_client.post.side_effect = httpx.HTTPStatusError(
         "Error", request=MagicMock(), response=mock_response
     )
     mock_client.__aenter__.return_value = mock_client
     mock_client.__aexit__.return_value = None
-    
+
     with patch('httpx.AsyncClient', return_value=mock_client):
         response = client.post(
             "/v1/chat/completions",
@@ -86,7 +86,7 @@ def test_chat_endpoint_http_status_error():
             },
             headers={"X-API-KEY": "test-secret-key"}
         )
-        
+
         assert response.status_code == 500
 
 
@@ -96,7 +96,7 @@ def test_chat_endpoint_generic_exception():
     mock_client.post.side_effect = Exception("Unexpected error")
     mock_client.__aenter__.return_value = mock_client
     mock_client.__aexit__.return_value = None
-    
+
     with patch('httpx.AsyncClient', return_value=mock_client):
         response = client.post(
             "/v1/chat/completions",
@@ -107,7 +107,7 @@ def test_chat_endpoint_generic_exception():
             },
             headers={"X-API-KEY": "test-secret-key"}
         )
-        
+
         assert response.status_code == 500
 
 
@@ -134,4 +134,3 @@ def test_rate_limiter_import():
     """Test rate limiter can be imported."""
     from rate_limit import limiter
     assert limiter is not None
-
