@@ -43,7 +43,7 @@ python3 start.py
 # API docs at: http://127.0.0.1:7860/docs
 ```
 
-**Expected behavior**: Server starts, browser auto-opens to UI, logs show startup banner with URL and API key. Server starts even without valid `PERPLEXITY_API_KEY` but API calls will fail.
+**Expected behavior**: Server starts, browser auto-opens to UI, logs show startup banner with URL and bridge secret (`BRIDGE_SECRET`, the bridge's API key). Server starts even without valid `PERPLEXITY_API_KEY` but API calls will fail.
 
 ---
 
@@ -368,7 +368,7 @@ node_modules/
 10. **Commit and push hygiene**:
     - Don't commit `__pycache__/`, `.env`, `venv/`, `node_modules/`
     - Use `.gitignore` to exclude build artifacts
-    - Use `report_progress` to commit changes, not direct `git` commands
+    - If you are using an automation agent that provides a `report_progress` helper, you may use it to stage/commit changes; otherwise, use standard `git` commands (`git add`, `git commit`, `git push`)
 
 ---
 
