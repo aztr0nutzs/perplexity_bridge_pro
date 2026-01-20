@@ -748,7 +748,6 @@ async def terminal(req: TerminalReq, request: Request):
     start_time = time.monotonic()
 
     async def stream_output():
-        nonlocal start_time
         output_bytes = 0
         proc = await asyncio.create_subprocess_exec(
             *args,

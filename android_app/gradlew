@@ -182,7 +182,4 @@ set -- \
         org.gradle.wrapper.GradleWrapperMain \
         "$@"
 
-# Stop when "xeli -u" is illegal (when /bin/sh is truly POSIX-compliant).
-set -- xeli -u 2>/dev/null && set +e
-
 exec "$JAVACMD" "$@"

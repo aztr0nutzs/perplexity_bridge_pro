@@ -72,16 +72,36 @@ def test_auth_middleware_blocks_unauthorized():
 
 def test_auth_middleware_allows_authorized():
     """Test authentication middleware allows requests with valid API key."""
-    response = client.post(
-        "/v1/chat/completions",
-        json={
-            "model": "test-model",
-            "messages": [{"role": "user", "content": "test"}]
-        },
-        headers={"X-API-KEY": "test-secret-key"}
-    )
-    # Will fail at API call level, but auth should pass (not 401)
-    assert response.status_code != 401
+    from unittest.mock import patch, AsyncMock, MagicMock
+    
+    # Create mock response
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "id": "test-id",
+        "model": "test-model", 
+        "choices": [{"message": {"role": "assistant", "content": "test response"}}]
+    }
+    mock_response.raise_for_status = MagicMock()
+    
+    # Create mock client
+    mock_client = AsyncMock()
+    mock_client.post.return_value = mock_response
+    mock_client.__aenter__.return_value = mock_client
+    mock_client.__aexit__.return_value = None
+    
+    with patch('httpx.AsyncClient', return_value=mock_client):
+        response = client.post(
+            "/v1/chat/completions",
+            json={
+                "model": "test-model",
+                "messages": [{"role": "user", "content": "test"}]
+            },
+            headers={"X-API-KEY": "test-secret-key"}
+        )
+        # Auth should pass (not 401) - test may fail for other reasons like 
+        # model validation, but the key point is auth passes
+        assert response.status_code != 401
 
 
 def test_terminal_endpoint_requires_auth():
