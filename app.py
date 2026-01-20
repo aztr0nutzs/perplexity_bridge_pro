@@ -364,6 +364,22 @@ async def get_models():
             "description": "Technical reasoning, coding, agentic workflows. Strong for structured problem solving",
             "provider": "perplexity",
             "category": "reasoning"
+    Get list of available models.
+    This endpoint returns all Perplexity-supported models including GPT, Claude, Gemini, Grok, Kimi, and Sonar variants.
+    Model availability depends on your Perplexity API subscription tier.
+    """
+    models = [
+        # OpenAI GPT Models (with reasoning)
+        {
+            "id": "gpt-5.2",
+            "name": "GPT-5.2",
+            "description": "OpenAI's latest flagship model with advanced reasoning capabilities, best for deep logic, coding, and reduced hallucinations"
+        },
+        # Anthropic Claude Models (with reasoning)
+        {
+            "id": "claude-4.5-sonnet",
+            "name": "Claude 4.5 Sonnet",
+            "description": "Efficient Claude model with strong coding and reasoning abilities, safe and structured responses"
         },
         {
             "id": "claude-4.5-opus",
@@ -371,6 +387,18 @@ async def get_models():
             "description": "Premium tier for most demanding logic and synthesis tasks",
             "provider": "perplexity",
             "category": "reasoning"
+            "description": "Most advanced Claude model with superior reasoning for Pro/Max/Enterprise users"
+        },
+        # Google Gemini Models
+        {
+            "id": "gemini-3-pro",
+            "name": "Gemini 3 Pro",
+            "description": "Google's multimodal AI with large context windows (up to 1M tokens), excellent for code, vision, and cross-modal reasoning"
+        },
+        {
+            "id": "gemini-3-flash",
+            "name": "Gemini 3 Flash",
+            "description": "Fast variant of Gemini 3 optimized for speed while maintaining strong performance"
         },
         # xAI Grok
         {
@@ -395,50 +423,45 @@ async def get_models():
             "description": "Real-time search, rapid summarization, transparent source citation. Best for factual research",
             "provider": "perplexity",
             "category": "search"
+            "description": "xAI's model with real-time web access, optimized for conversational intelligence and up-to-date information"
+        },
+        # Moonshot Kimi (with reasoning)
+        {
+            "id": "kimi-k2-thinking",
+            "name": "Kimi K2 Thinking",
+            "description": "Privacy-first model with step-by-step reasoning always enabled, ideal for technical analysis"
+        },
+        # Perplexity Sonar Models (Llama 3.1 based)
+        {
+            "id": "sonar-70b",
+            "name": "Sonar 70B",
+            "description": "Perplexity's flagship model optimized for real-time search, retrieval, and web summarization with source citations"
         },
         {
             "id": "llama-3.1-sonar-small-128k-online",
             "name": "Llama 3.1 Sonar Small (128k)",
-            "description": "Small model with 128k context window and online capabilities",
-            "provider": "perplexity",
-            "category": "chat"
+            "description": "Small Sonar model with 128k context window and online capabilities, fast and efficient"
         },
         {
             "id": "llama-3.1-sonar-large-128k-online",
             "name": "Llama 3.1 Sonar Large (128k)",
-            "description": "Large model with 128k context window and online capabilities",
-            "provider": "perplexity",
-            "category": "chat"
+            "description": "Large Sonar model with 128k context window and online capabilities, balanced performance"
         },
         {
             "id": "llama-3.1-sonar-huge-128k-online",
             "name": "Llama 3.1 Sonar Huge (128k)",
-            "description": "Huge model with 128k context window and online capabilities",
-            "provider": "perplexity",
-            "category": "chat"
+            "description": "Huge Sonar model with 128k context window and online capabilities, maximum accuracy"
         },
-        # Legacy Mistral
+        # Additional Llama Models
+        {
+            "id": "llama-3.1-70b-instruct",
+            "name": "Llama 3.1 70B Instruct",
+            "description": "Meta's Llama 3.1 70B instruction-tuned model for general-purpose tasks"
+        },
         {
             "id": "mistral-7b-instruct",
             "name": "Mistral 7B Instruct",
-            "description": "7B parameter instruction-tuned model",
-            "provider": "perplexity",
-            "category": "chat"
-        },
-        # GitHub Copilot Models
-        {
-            "id": "copilot-gpt-4",
-            "name": "GitHub Copilot GPT-4",
-            "description": "GitHub Copilot powered by GPT-4 for advanced code completion and generation",
-            "provider": "github-copilot",
-            "category": "coding"
-        },
-        {
-            "id": "copilot-agent",
-            "name": "GitHub Copilot Agent",
-            "description": "Multi-step task-oriented workflows for DevOps and development automation",
-            "provider": "github-copilot",
-            "category": "coding"
+            "description": "Efficient 7B parameter instruction-tuned model for quick responses"
         }
     ]
     data = [

@@ -54,6 +54,15 @@ Access to cutting-edge AI models organized by category:
 ### Advanced Options
 
 - **Model Categories**: Reasoning, Coding, Search - organized for easy selection
+- **Comprehensive Model Support**: Access to all Perplexity-supported AI models including:
+  - **GPT-5.2** (OpenAI) - Advanced reasoning, coding, and deep logic
+  - **Claude 4.5 Sonnet & Opus** (Anthropic) - Superior reasoning and coding with safety focus
+  - **Gemini 3 Pro & Flash** (Google) - Multimodal AI with massive context windows
+  - **Grok 4.1** (xAI) - Real-time web access and conversational intelligence
+  - **Kimi K2** (Moonshot) - Privacy-first with always-on reasoning
+  - **Sonar Models** (Perplexity/Llama 3.1) - Optimized for real-time search with citations
+  - **Llama 3.1 & Mistral** - Efficient general-purpose models
+- **Reasoning Modes**: Many models support explicit reasoning toggles for deeper analysis
 - **Advanced Parameters**: Fine-tune responses with temperature, max tokens, frequency penalty controls
 - **System Prompts**: Customizable system prompts for specialized use cases
 - **Tool Calling**: Function calling support for enhanced capabilities
@@ -75,6 +84,136 @@ Access to cutting-edge AI models organized by category:
 - **Export Functionality**: Export conversations and data in various formats
 - **Theme Support**: Light and dark theme options for the web interface
 - **Responsive Design**: Mobile-friendly interface that works across all devices
+
+## Available Models
+
+Perplexity Bridge Pro provides access to the **complete range of models** available through the Perplexity AI API. All models are accessible through this bridge, exactly as Perplexity offers them - that's the whole point of this unique bridge application! Model availability depends on your Perplexity API subscription tier and valid API key.
+
+### OpenAI GPT Models
+
+#### GPT-5.2
+- **Model ID**: `gpt-5.2`
+- **Reasoning**: ✅ Advanced reasoning mode available
+- **Best For**: Deep logical reasoning, complex coding tasks, structured content generation, long-context analysis
+- **Strengths**: Generalist model with high accuracy, creativity, and state-of-the-art hallucination mitigation
+- **Context Window**: Large context support
+- **Use Cases**: Essays, code debugging, multi-step planning, complex problem-solving
+
+### Anthropic Claude Models
+
+#### Claude 4.5 Sonnet
+- **Model ID**: `claude-4.5-sonnet`
+- **Reasoning**: ✅ Reasoning mode available
+- **Best For**: Efficient coding, business automation, technical problem-solving
+- **Strengths**: High-reliability reasoning, safe and structured responses, excellent for agentic workflows
+- **Use Cases**: Production code, automated workflows, technical documentation
+
+#### Claude 4.5 Opus
+- **Model ID**: `claude-4.5-opus`
+- **Reasoning**: ✅ Full reasoning capabilities (Pro/Max/Enterprise)
+- **Best For**: Most demanding reasoning tasks, enterprise use cases
+- **Strengths**: Superior reasoning, advanced coding abilities, nuanced responses for complex scenarios
+- **Use Cases**: Complex business logic, critical decision-making, sophisticated analysis
+
+### Google Gemini Models
+
+#### Gemini 3 Pro
+- **Model ID**: `gemini-3-pro`
+- **Reasoning**: ✅ Always-on reasoning
+- **Best For**: Multimodal AI tasks, large-scale data analysis, enterprise search
+- **Strengths**: Native support for huge context windows (up to 1M tokens), seamless across text/code/video/audio
+- **Context Window**: Up to 1 million tokens
+- **Use Cases**: Organization-wide document search, video/audio analysis, complex data summarization
+
+#### Gemini 3 Flash
+- **Model ID**: `gemini-3-flash`
+- **Reasoning**: ✅ Fast reasoning
+- **Best For**: Speed-optimized multimodal tasks
+- **Strengths**: Faster inference while maintaining strong performance
+- **Use Cases**: Real-time applications, quick analysis, rapid prototyping
+
+### xAI Grok
+
+#### Grok 4.1
+- **Model ID**: `grok-4.1`
+- **Reasoning**: ✅ Reasoning toggle available
+- **Best For**: Real-time data access, trend detection, social media analysis
+- **Strengths**: Up-to-date web/social data (especially X/Twitter), creative responses, emerging event analysis
+- **Use Cases**: Social listening, trend detection, current events, breaking news analysis
+
+### Moonshot Kimi
+
+#### Kimi K2 Thinking
+- **Model ID**: `kimi-k2-thinking`
+- **Reasoning**: ✅ Always-on step-by-step reasoning
+- **Best For**: Privacy-first technical analysis, logical problem-solving
+- **Strengths**: Strong privacy focus, stepwise reasoning built-in, technical explanations
+- **Use Cases**: Confidential analysis, privacy-sensitive organizations, detailed technical breakdowns
+
+### Perplexity Sonar Models (Real-time Search)
+
+Perplexity's proprietary models built on Llama 3.1, optimized for real-time web search with source citations.
+
+#### Sonar 70B
+- **Model ID**: `sonar-70b`
+- **Reasoning**: ✅ Reasoning toggle available
+- **Best For**: Fast real-time search, current information retrieval
+- **Strengths**: Source-cited, fresh data, highly reliable for current events
+- **Use Cases**: Research, fact-checking, news aggregation, up-to-date information
+
+#### Sonar Small (128k) Online
+- **Model ID**: `llama-3.1-sonar-small-128k-online`
+- **Context Window**: 128k tokens
+- **Best For**: Fast lookups, quick queries with online capabilities
+- **Strengths**: Efficient, fast responses with web access
+- **Use Cases**: Quick research, rapid fact-checking
+
+#### Sonar Large (128k) Online
+- **Model ID**: `llama-3.1-sonar-large-128k-online`
+- **Context Window**: 128k tokens
+- **Best For**: Balanced performance with online search capabilities
+- **Strengths**: Good balance of speed and accuracy with real-time web data
+- **Use Cases**: General research, comprehensive queries, detailed lookups
+
+#### Sonar Huge (128k) Online
+- **Model ID**: `llama-3.1-sonar-huge-128k-online`
+- **Context Window**: 128k tokens
+- **Best For**: Maximum accuracy with online capabilities
+- **Strengths**: Most accurate Sonar variant, deep analysis with web access
+- **Use Cases**: Critical research, detailed analysis, comprehensive investigations
+
+### Other Models
+
+#### Llama 3.1 70B Instruct
+- **Model ID**: `llama-3.1-70b-instruct`
+- **Best For**: General-purpose instruction following
+- **Strengths**: Meta's powerful instruction-tuned model, versatile
+- **Use Cases**: General tasks, instruction following, conversational AI
+
+#### Mistral 7B Instruct
+- **Model ID**: `mistral-7b-instruct`
+- **Best For**: Efficient quick responses
+- **Strengths**: Fast, lightweight, efficient for simple tasks
+- **Use Cases**: Quick queries, simple tasks, resource-constrained environments
+
+### Model Selection Guide
+
+**For Coding & Technical Tasks**: Claude 4.5 Sonnet/Opus, GPT-5.2  
+**For Research & Current Information**: Sonar models, Grok 4.1  
+**For Multimodal & Large Context**: Gemini 3 Pro/Flash  
+**For Privacy-Sensitive Work**: Kimi K2 Thinking  
+**For Complex Reasoning**: GPT-5.2, Claude 4.5 Opus, Gemini 3 Pro  
+**For Speed & Efficiency**: Gemini 3 Flash, Mistral 7B, Sonar Small  
+**For Real-time Trends**: Grok 4.1, Sonar models  
+
+### Important Notes
+
+- **Valid API Key Required**: All models require a valid Perplexity API key with appropriate subscription tier
+- **Subscription Tiers**: Some models (like Claude 4.5 Opus) require Pro/Max/Enterprise subscriptions
+- **Model Availability**: Model availability may vary based on your Perplexity account tier and region
+- **Reasoning Modes**: Models with reasoning capabilities can be toggled for deeper analysis at the cost of response time
+- **Context Windows**: Respect model-specific context window limits for optimal performance
+- **API Costs**: Usage incurs costs based on your Perplexity API pricing plan and model selection
 
 ## Installation and Setup
 
@@ -202,6 +341,11 @@ The bridge provides access to 15+ AI models organized by category:
 4. **Configure Options**: Adjust temperature, max tokens, and other parameters as needed
 5. **Send Message**: Click send or press Ctrl+Enter
 6. **View Response**: Responses appear in real-time with streaming support (Perplexity models)
+1. **Select a Model**: Choose from all available models including GPT-5.2, Claude 4.5, Gemini 3 Pro, Grok 4.1, Kimi K2, and Sonar variants
+2. **Enter Your Prompt**: Type your question or prompt in the text area
+3. **Configure Options**: Adjust temperature, max tokens, and other parameters as needed
+4. **Send Message**: Click send or press Ctrl+Enter
+5. **View Response**: Responses appear in real-time with streaming support
 
 #### Advanced Features
 
@@ -228,6 +372,71 @@ See [MULTI_MODEL_GUIDE.md](MULTI_MODEL_GUIDE.md) for comprehensive documentation
 ### Examples
 
 #### Code Generation with GitHub Copilot
+#### Using GPT-5.2 for Complex Reasoning
+
+```bash
+curl -X POST http://localhost:7860/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: your_bridge_secret" \
+  -d '{
+    "model": "gpt-5.2",
+    "messages": [
+      {"role": "user", "content": "Explain quantum entanglement and its implications for quantum computing"}
+    ],
+    "max_tokens": 1000,
+    "temperature": 0.2
+  }'
+```
+
+#### Using Claude 4.5 Sonnet for Code Generation
+
+```bash
+curl -X POST http://localhost:7860/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: your_bridge_secret" \
+  -d '{
+    "model": "claude-4.5-sonnet",
+    "messages": [
+      {"role": "user", "content": "Write a Python function to implement binary search with comprehensive error handling"}
+    ],
+    "max_tokens": 1500,
+    "temperature": 0.3
+  }'
+```
+
+#### Using Gemini 3 Pro for Multimodal Analysis
+
+```bash
+curl -X POST http://localhost:7860/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: your_bridge_secret" \
+  -d '{
+    "model": "gemini-3-pro",
+    "messages": [
+      {"role": "user", "content": "Analyze this large codebase and provide architectural recommendations"}
+    ],
+    "max_tokens": 2000,
+    "temperature": 0.4
+  }'
+```
+
+#### Using Grok 4.1 for Real-time Information
+
+```bash
+curl -X POST http://localhost:7860/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: your_bridge_secret" \
+  -d '{
+    "model": "grok-4.1",
+    "messages": [
+      {"role": "user", "content": "What are the latest trends in AI development this week?"}
+    ],
+    "max_tokens": 800,
+    "temperature": 0.6
+  }'
+```
+
+#### Using Sonar for Research with Citations
 
 ```bash
 curl -X POST http://localhost:7860/v1/chat/completions \
@@ -260,23 +469,46 @@ curl -X POST http://localhost:7860/v1/chat/completions \
   -H "X-API-KEY: your_bridge_secret" \
   -d '{
     "model": "mistral-7b-instruct",
+    "model": "sonar-70b",
     "messages": [
-      {"role": "user", "content": "Explain quantum computing in simple terms"}
+      {"role": "user", "content": "What are the recent breakthroughs in fusion energy research?"}
     ],
-    "max_tokens": 500,
-    "temperature": 0.7
+    "max_tokens": 1200,
+    "temperature": 0.5
   }'
 ```
 
-#### WebSocket Streaming Example
+#### WebSocket Streaming with Different Models
 
 ```javascript
+// Using Claude for streaming code assistance
+const ws = new WebSocket('ws://localhost:7860/ws/chat?api_key=your_secret');
+
+ws.onopen = () => {
+  ws.send(JSON.stringify({
+    model: 'claude-4.5-sonnet',
+    messages: [{ role: 'user', content: 'Help me optimize this Python code for performance' }],
+    stream: true,
+    temperature: 0.3
+  }));
+};
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.choices && data.choices[0].delta) {
+    console.log('Chunk:', data.choices[0].delta.content);
+  }
+};
+```
+
+```javascript
+// Using Sonar for real-time research
 const ws = new WebSocket('ws://localhost:7860/ws/chat?api_key=your_secret');
 
 ws.onopen = () => {
   ws.send(JSON.stringify({
     model: 'llama-3.1-sonar-large-128k-online',
-    messages: [{ role: 'user', content: 'What are the latest developments in AI?' }],
+    messages: [{ role: 'user', content: 'What are the latest developments in renewable energy?' }],
     stream: true,
     temperature: 0.5
   }));
@@ -290,7 +522,7 @@ ws.onmessage = (event) => {
 };
 ```
 
-#### Python Integration
+#### Python Integration with Multiple Models
 
 ```python
 from adapters.roo_adapter import RooAdapter
@@ -307,8 +539,34 @@ os.environ['ROO_BRIDGE_URL'] = 'http://localhost:7860'
 os.environ['ROO_BRIDGE_KEY'] = 'your_bridge_secret'
 
 adapter = RooAdapter()
-response = adapter.query("What is the capital of France?")
+
+# Use GPT-5.2 for complex reasoning
+response = adapter.query(
+    "Explain the implications of quantum supremacy",
+    model="gpt-5.2"
+)
 print(response)
+
+# Use Claude for code generation
+code_response = adapter.query(
+    "Generate a REST API endpoint for user authentication",
+    model="claude-4.5-sonnet"
+)
+print(code_response)
+
+# Use Sonar for research
+research = adapter.query(
+    "What are the latest advancements in CRISPR gene editing?",
+    model="sonar-70b"
+)
+print(research)
+
+# Use Gemini for large context analysis
+analysis = adapter.query(
+    "Analyze these 50 documents and provide a comprehensive summary",
+    model="gemini-3-pro"
+)
+print(analysis)
 ```
 
 ### VSCode Extension Usage
@@ -375,24 +633,38 @@ X-API-KEY: your_bridge_secret
 Main chat completion endpoint compatible with OpenAI API format.
 
 **Parameters:**
-- `model` (string, required): Model ID (e.g., "mistral-7b-instruct")
+- `model` (string, required): Model ID - see Available Models section for complete list
+  - Examples: "gpt-5.2", "claude-4.5-sonnet", "gemini-3-pro", "grok-4.1", "kimi-k2-thinking", "sonar-70b"
 - `messages` (array, required): Array of message objects with `role` and `content`
 - `stream` (boolean, optional): Enable streaming responses (default: false)
 - `max_tokens` (integer, optional): Maximum tokens to generate (1-4096, default: 1024)
 - `temperature` (float, optional): Sampling temperature (0.0-2.0, default: 0.0)
 - `frequency_penalty` (float, optional): Frequency penalty (-2.0-2.0, default: 1.0)
 
-**Example Request:**
+**Example Request with GPT-5.2:**
 ```json
 {
-  "model": "mistral-7b-instruct",
+  "model": "gpt-5.2",
   "messages": [
     {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "Hello, how are you?"}
+    {"role": "user", "content": "Explain quantum computing"}
   ],
   "stream": false,
-  "max_tokens": 150,
-  "temperature": 0.7
+  "max_tokens": 500,
+  "temperature": 0.3
+}
+```
+
+**Example Request with Claude 4.5:**
+```json
+{
+  "model": "claude-4.5-sonnet",
+  "messages": [
+    {"role": "user", "content": "Write a Python function for sorting"}
+  ],
+  "stream": false,
+  "max_tokens": 800,
+  "temperature": 0.2
 }
 ```
 
@@ -421,22 +693,43 @@ Main chat completion endpoint compatible with OpenAI API format.
 
 #### `GET /models`
 
-Retrieve available models.
+Retrieve all available models including GPT, Claude, Gemini, Grok, Kimi, and Sonar variants.
 
 **Response:**
 ```json
 {
   "models": [
     {
-      "id": "mistral-7b-instruct",
-      "name": "Mistral 7B Instruct",
-      "description": "7B parameter instruction-tuned model"
+      "id": "gpt-5.2",
+      "name": "GPT-5.2",
+      "description": "OpenAI's latest flagship model with advanced reasoning capabilities"
     },
     {
-      "id": "llama-3.1-sonar-small-128k-online",
-      "name": "Llama 3.1 Sonar Small (128k)",
-      "description": "Small model with 128k context window and online capabilities"
-    }
+      "id": "claude-4.5-sonnet",
+      "name": "Claude 4.5 Sonnet",
+      "description": "Efficient Claude model with strong coding and reasoning abilities"
+    },
+    {
+      "id": "gemini-3-pro",
+      "name": "Gemini 3 Pro",
+      "description": "Google's multimodal AI with large context windows (up to 1M tokens)"
+    },
+    {
+      "id": "grok-4.1",
+      "name": "Grok 4.1",
+      "description": "xAI's model with real-time web access"
+    },
+    {
+      "id": "kimi-k2-thinking",
+      "name": "Kimi K2 Thinking",
+      "description": "Privacy-first model with step-by-step reasoning"
+    },
+    {
+      "id": "sonar-70b",
+      "name": "Sonar 70B",
+      "description": "Perplexity's flagship model optimized for real-time search with citations"
+    },
+    ... // Additional models available
   ]
 }
 ```
