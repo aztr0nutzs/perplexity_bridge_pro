@@ -13,7 +13,7 @@ def test_has_github_copilot_with_key():
     import config
     importlib.reload(config)
     from config import has_github_copilot
-    assert has_github_copilot() == True
+    assert has_github_copilot()
 
 
 def test_has_github_copilot_without_key():
@@ -25,4 +25,4 @@ def test_has_github_copilot_without_key():
     import config
     importlib.reload(config)
     from config import has_github_copilot
-    assert has_github_copilot() == False
+    assert not has_github_copilot()
