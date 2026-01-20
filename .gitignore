@@ -82,12 +82,8 @@ temp/
 node_modules/
 
 # Build artifacts
-# Allow committed VSCode extension
-!vscode_extension/*.vsix
+*.vsix
 
-# Android asset bloat prevention
-android_app/app/src/main/assets/perplexity_api_project_files/
-
-# Test coverage
-coverage.xml
-.mypy_cache/
+# Gradle
+.gradle/
+android_app/.gradle/

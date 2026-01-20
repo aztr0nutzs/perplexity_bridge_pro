@@ -1,0 +1,26 @@
+{
+  "name": "perplexity-bridge-pro",
+  "version": "1.0.0",
+  "description": "Perplexity Bridge Pro - FastAPI proxy bridge to Perplexity AI API",
+  "private": true,
+  "workspaces": [
+    "vscode_extension"
+  ],
+  "scripts": {
+    "install:vscode": "cd vscode_extension && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aztr0nutzs/perplexity_bridge_pro.git"
+  },
+  "keywords": [
+    "perplexity",
+    "ai",
+    "api",
+    "bridge",
+    "proxy",
+    "fastapi"
+  ],
+  "author": "aztr0nutzs",
+  "license": "MIT"
+}
