@@ -1,16 +1,22 @@
 apply plugin: 'com.android.application'
 android {
-    namespace 'com.example.perplexitybridge'
+    namespace 'ai.perplexity.bridge'
     compileSdk 34
     defaultConfig {
-        applicationId "com.example.perplexitybridge"
+        applicationId "ai.perplexity.bridge"
         minSdk 21
         targetSdk 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    buildTypes { release { minifyEnabled false } }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
 }
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'

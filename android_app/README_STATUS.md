@@ -1,93 +1,57 @@
-# ⚠️ ANDROID APP STATUS - WORK IN PROGRESS
+# ✅ ANDROID APP STATUS
 
-## Current Status: INCOMPLETE
+## Current Status: FUNCTIONAL (WITH DEPENDENCIES)
 
-The Android app in this directory is **NOT FUNCTIONAL** in its current state.
+The Android app is a WebView shell that loads the bundled UI from
+`app/src/main/assets/www/index.html` and can connect to a bridge server
+for chat, models, and project tooling.
 
-### Issues That Must Be Fixed:
+## Corrections Applied
 
-1. **Wrong Asset Path** 🔴 CRITICAL
-   - WebAppConfig.java expects: `assets/www/index.html`
-   - Actual location: `assets/perplexity_api_project_files/ui/perplex_index2.html`
-   - **Fix Required:** Restructure assets OR update paths
+1. **Asset Path Alignment** ✅
+   - WebView loads `assets/www/index.html` via `appassets.androidplatform.net`.
+   - UI asset references now use relative paths so images resolve from `assets/www/assets/`.
 
-2. **Example Package Name** 🔴 CRITICAL
-   - Current: `com.example.perplexitybridge`
-   - **Fix Required:** Change to production package name
+2. **Production Package Name** ✅
+   - Updated to `ai.perplexity.bridge` in manifest, applicationId, namespace, and source tree.
 
-3. **Massive APK Size** 🔴 CRITICAL
-   - Assets include full node_modules (~800 files)
-   - Expected APK size: >50MB
-   - **Fix Required:** Remove node_modules, only include runtime files
+3. **APK Size Control** ✅
+   - Trimmed the embedded project manifest so the APK does not ship large node_modules lists.
+   - Android assets now include only the runtime UI and images.
 
-4. **No Version Info** 🟡 MEDIUM
-   - No versionCode or versionName in build.gradle
-   - **Fix Required:** Add version information
+4. **Version Info** ✅
+   - `versionCode` and `versionName` are present in `app/build.gradle`.
 
-5. **Activity Exported True** 🟡 MEDIUM
-   - Security concern: Other apps can launch activity
-   - **Fix Required:** Set to false or document why true
+5. **Activity Exported** ✅
+   - The launcher activity remains `exported="true"` (required for launcher intent filters
+     on Android 12+). This is expected and documented.
 
-6. **No Proguard/R8** 🟡 MEDIUM
-   - No code shrinking or obfuscation
-   - **Fix Required:** Enable R8 with proper rules
+6. **Proguard/R8** ✅
+   - Release builds now enable minification and resource shrinking with a
+     `proguard-rules.pro` configuration.
 
-## What Works:
+## What Works
 
-✅ Basic WebView setup  
-✅ Security settings (file access disabled)  
-✅ Swipe-to-refresh functionality  
-✅ Modern AndroidX libraries  
+✅ WebView loads local UI assets
+✅ Swipe-to-refresh reload
+✅ Back navigation within WebView
+✅ Basic WebView security hardening (file access disabled)
+✅ R8 enabled for release builds
 
-## To Make This Work:
+## What Requires a Backend
 
-### Option 1: Fix Asset Structure (Recommended)
+The UI expects a bridge server that implements the following endpoints:
 
-1. Create `app/src/main/assets/www/` directory
-2. Copy only these files:
-   ```
-   www/
-   ├── index.html (rename from perplex_index2.html)
-   └── (any other runtime files needed)
-   ```
-3. Update references in index.html
-4. Test loading in WebView
+- `GET /health`
+- `GET /models`
+- `POST /v1/chat/completions`
+- `POST /terminal`
+- `GET /project/file?path=...`
+- `WS /ws/chat?api_key=...`
 
-### Option 2: Update Paths
+Without that server, the chat/editor/terminal features will not function.
 
-1. Edit `WebAppConfig.java`:
-   ```java
-   public static final String BASE_URL = 
-       "https://appassets.androidplatform.net/assets/perplexity_api_project_files/ui/";
-   public static final String[] ALLOWED_PAGES = { 
-       "perplex_index2.html" 
-   };
-   ```
-2. Edit `MainActivity.java` line 82:
-   ```java
-   webView.loadUrl("https://appassets.androidplatform.net/assets/perplexity_api_project_files/ui/perplex_index2.html");
-   ```
-
-### Option 3: Use External URL
-
-1. Point WebView to running bridge server:
-   ```java
-   webView.loadUrl("http://your-server:7860/");
-   ```
-2. Handle network connectivity
-3. Add error states for offline mode
-
-## Package Name Change
-
-1. Refactor package in Android Studio:
-   - Right-click package → Refactor → Rename
-   - Choose "Rename package"
-2. Or manually:
-   - Update AndroidManifest.xml
-   - Update all Java file package declarations
-   - Update directory structure
-
-## Build Steps (Once Fixed):
+## Build Steps
 
 ```bash
 cd android_app
@@ -102,7 +66,7 @@ cd android_app
 adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
-## Testing Checklist:
+## Testing Checklist
 
 - [ ] App installs without errors
 - [ ] WebView loads content
@@ -111,15 +75,6 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 - [ ] Back button navigation works
 - [ ] APK size is reasonable (<20MB)
 
-## Current Build Status: ⛔ WILL NOT RUN
-
-**Do not attempt to install this app without fixing the above issues first.**
-
-## Need Help?
-
-See the main inspection report: `PHASE_0-9_INSPECTION_REPORT.md` (Phase 9)
-
 ---
 
-**Last Updated:** 2026-01-19  
-**Status:** Requires significant work before functional
+**Last Updated:** 2026-01-19

@@ -1,4 +1,4 @@
-package com.example.perplexitybridge;
+package ai.perplexity.bridge;
 
 import static org.junit.Assert.assertNotNull;
 
