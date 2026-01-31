@@ -1,4 +1,4 @@
-package com.example.perplexitybridge;
+package ai.perplexity.bridge;
 
 import java.util.Collections;
 import java.util.HashSet;
