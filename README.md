@@ -1,4 +1,4 @@
-![Perplexity Bridge Header](assets/per_api_header.png)
+![Perplexity Bridge Header](assets/perp_api_header.png)
 
 # Perplexity Bridge Pro
 
